@@ -4,10 +4,9 @@ import APIFormComponent from './APIFormComponent'
 function HomeComponent() {
   return (
     <div className='bg-gradient-to-r from-slate-50 via-slate-200 to-gray-100 animate-gradient-x' >
-      <div className='text-center text-3xl font-semibold tracking-wide py-10'>
-        <h1 className='text-blue-500'>Welcome to PDF to GPT</h1>
+      <div className='text-center text-3xl font-semibold tracking-wide py-6'>
+        <h1 className='text-blue-500 antialiased font-sans font-light tracking-wide leading-loose'>Welcome to PDF to GPT</h1>
       </div>
-
 
       <div className="flex flex-col items-center px-4 sm:px-6 lg:px-8 py-10">
         <div className='mb-4'>
@@ -20,7 +19,7 @@ function HomeComponent() {
           </a>
         </div>
 
-        <div className="max-w-4xl mx-auto p-8 md:p-12 my-12 rounded-lg shadow-2xl bg-gray-50">
+        <div className="max-w-4xl mx-auto p-8 md:p-12 my-12 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-500 bg-gray-50">
           <h2 className="text-2xl font-bold text-gray-800 mt-4 mb-6 text-center">How to Use</h2>
 
           <ol className="text-gray-700">

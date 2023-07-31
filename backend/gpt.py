@@ -10,6 +10,7 @@ from flask import (
     jsonify,
     make_response,
 )
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import PyPDF2
@@ -19,6 +20,7 @@ from flask import flash
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), "uploads")
 
 app = Flask(__name__)
+CORS(app)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = os.urandom(24)
 
@@ -38,7 +40,7 @@ def extract_text_from_pdf(file_path):
 def upload_file():
     if request.method == "POST":
         if "pdf_file" not in request.files:
-            return render_template("index.html", error="No file part")
+            return render_template("/frontend/public/index.html", error="No file part")
 
         file = request.files["pdf_file"]
         model_choice = request.form["model_choice"]

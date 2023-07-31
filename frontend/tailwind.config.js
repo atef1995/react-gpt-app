@@ -6,6 +6,10 @@ module.exports = {
     './src/**/*.{js,jsx,ts,tsx,vue}',],
   theme: {
     extend: {
+      textShadow: {
+        'default': '0 2px 5px rgba(0, 0, 0, 0.5)',
+        'lg': '0 2px 10px rgba(0, 0, 0, 0.5)',
+      },
       animation: {
         'gradient-x': 'gradient-x 30s ease infinite',
         'gradient-y': 'gradient-y 30s ease infinite',
