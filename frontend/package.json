@@ -10,13 +10,18 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.14.2",
     "react-scripts": "5.0.1",
+    "styled-components": "^6.0.5",
+    "tailwindcss": "^3.3.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:css": "tailwind build src/index.css -o src/tailwind.css",
+    "watch:css": "chokidar './**/*.css' -c 'npm run build:css'"
+
   },
   "eslintConfig": {
     "extends": [

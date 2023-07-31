@@ -1,18 +1,18 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {Route, Routes, BrowserRouter } from 'react-router-dom';
 import HomeComponent from './components/HomeComponent';
 import QAComponent from './components/QAComponent';
 import NavBar from './components/NavBar';
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <NavBar />
       <Routes>
-        <Route path="/" exact component={HomeComponent} />
-        <Route path="/qa" component={QAComponent} />
+        <Route path="/" element={<HomeComponent/>} />
+        <Route path="/qa" element={<QAComponent/>} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 
