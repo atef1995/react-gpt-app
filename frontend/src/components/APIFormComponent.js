@@ -16,7 +16,7 @@ const APIFormComponent = () => {
     // You might send a request to your backend, for example.
     // console.log(apiKey, selectedFile, modelChoice);
     const data = { apiKey, selectedFile, modelChoice }
-    axios.post('/upload', data)
+    axios.post('http://127.0.0.1:5000/upload', data)
       .then(response => {
         console.log(response.data);
       })

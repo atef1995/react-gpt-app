@@ -9,6 +9,7 @@ from flask import (
     url_for,
     jsonify,
     make_response,
+    send_from_directory,
 )
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -19,7 +20,7 @@ from flask import flash
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), "uploads")
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend/public")
 CORS(app)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = os.urandom(24)
@@ -40,16 +41,22 @@ def extract_text_from_pdf(file_path):
 def upload_file():
     if request.method == "POST":
         if "pdf_file" not in request.files:
-            return render_template("/frontend/public/index.html", error="No file part")
+            return send_from_directory(app.static_folder, "index.html")
 
         file = request.files["pdf_file"]
         model_choice = request.form["model_choice"]
         api_key = request.form["api_key"]
 
         if model_choice == "gpt3" and not api_key:
-            return render_template("index.html", error="API key is required for GPT-3.")
+            send_from_directory(
+                app.static_folder,
+                "index.html",
+            )
         if file.filename == "":
-            return render_template("index.html", error="No selected file")
+            return send_from_directory(
+                app.static_folder,
+                "index.html",
+            )
 
         if file and file.filename.lower().endswith(".pdf"):
             filename = secure_filename(file.filename)
@@ -61,9 +68,12 @@ def upload_file():
             session["api_key"] = api_key
             return redirect(url_for("ask_question"))
         else:
-            return render_template("index.html", error="Invalid file type")
+            return send_from_directory(
+                app.static_folder,
+                "index.html",
+            )
 
-    return render_template("index.html")
+    return send_from_directory(app.static_folder, "index.html")
 
 
 def ask_gpt3(question, document, user_api_key):
@@ -84,7 +94,7 @@ def ask_gpt3(question, document, user_api_key):
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/ask", methods=["GET", "POST"])
@@ -124,7 +134,7 @@ def ask_question():
         return jsonify(question=question, answer=answer)
     else:
         qa_pairs = session.get("qa_pairs", [])
-        return render_template("ask.html", qa_pairs=qa_pairs)
+        return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/export", methods=["GET"])
