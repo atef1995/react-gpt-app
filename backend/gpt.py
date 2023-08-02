@@ -41,22 +41,16 @@ def extract_text_from_pdf(file_path):
 def upload_file():
     if request.method == "POST":
         if "pdf_file" not in request.files:
-            return send_from_directory(app.static_folder, "index.html")
+            return jsonify({"error": "No file uploaded."}), 400
 
         file = request.files["pdf_file"]
-        model_choice = request.form["model_choice"]
-        api_key = request.form["api_key"]
+        model_choice = request.form.get("model_choice")
+        api_key = request.form.get("api_key")
 
         if model_choice == "gpt3" and not api_key:
-            send_from_directory(
-                app.static_folder,
-                "index.html",
-            )
+            return jsonify({"error": "API key is required for GPT-3."}), 400
         if file.filename == "":
-            return send_from_directory(
-                app.static_folder,
-                "index.html",
-            )
+            return jsonify({"error": "No file selected."}), 400
 
         if file and file.filename.lower().endswith(".pdf"):
             filename = secure_filename(file.filename)
@@ -66,12 +60,9 @@ def upload_file():
             session["text"] = text
             session["model_choice"] = model_choice
             session["api_key"] = api_key
-            return redirect(url_for("ask_question"))
+            return jsonify({"success": "File uploaded successfully."}), 200
         else:
-            return send_from_directory(
-                app.static_folder,
-                "index.html",
-            )
+            return jsonify({"error": "Only PDF files are allowed."}), 400
 
     return send_from_directory(app.static_folder, "index.html")
 
@@ -100,7 +91,13 @@ def home():
 @app.route("/ask", methods=["GET", "POST"])
 def ask_question():
     if request.method == "POST":
-        question = request.form["question"]
+        json_data = request.get_json()
+        question = json_data.get("question")
+
+        # check if a question is provided
+        if not question:
+            return jsonify({"error": "No question provided."}), 400
+
         text = session.get("text")
         model_choice = session.get("model_choice")
         api_key = session.get("api_key")
@@ -134,7 +131,7 @@ def ask_question():
         return jsonify(question=question, answer=answer)
     else:
         qa_pairs = session.get("qa_pairs", [])
-        return send_from_directory(app.static_folder, "index.html")
+        return jsonify({"qa_pairs": qa_pairs})
 
 
 @app.route("/export", methods=["GET"])

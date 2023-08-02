@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 
 const APIFormComponent = () => {
@@ -7,6 +8,7 @@ const APIFormComponent = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [modelChoice, setModelChoice] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
 
   const handleSubmit = (event) => {
@@ -15,13 +17,25 @@ const APIFormComponent = () => {
     // Here you would handle the form submission.
     // You might send a request to your backend, for example.
     // console.log(apiKey, selectedFile, modelChoice);
-    const data = { apiKey, selectedFile, modelChoice }
-    axios.post('http://127.0.0.1:5000/upload', data)
+    const formData = new FormData();
+    formData.append('pdf_file', selectedFile);
+    formData.append('model_choice', modelChoice);
+    formData.append('api_key', apiKey);
+    axios.post('http://127.0.0.1:5000/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+      .then(response => {
+        console.log(response.data);
+        navigate('/ask');
+      })
       .then(response => {
         console.log(response.data);
       })
       .catch(error => {
         console.log(error);
+        setLoading(false);
       });
   };
 
