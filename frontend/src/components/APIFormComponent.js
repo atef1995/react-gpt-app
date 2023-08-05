@@ -21,17 +21,20 @@ const APIFormComponent = () => {
     formData.append('pdf_file', selectedFile);
     formData.append('model_choice', modelChoice);
     formData.append('api_key', apiKey);
-    axios.post('http://127.0.0.1:5000/upload', formData, {
+    axios.post('http://127.0.0.1:8000/upload/', formData, {
+      withCredentials: true,
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer`
       }
     })
       .then(response => {
         console.log(response.data);
         navigate('/ask');
+        return response.data;
       })
-      .then(response => {
-        console.log(response.data);
+      .then(data => {
+        console.log(data);
       })
       .catch(error => {
         console.log(error);
@@ -60,7 +63,7 @@ const APIFormComponent = () => {
               <label htmlFor="Model-Choice" className="sr-only">Model Choice</label>
               <select id="Model-Choice" name="Model Choice" required className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" value={modelChoice} onChange={e => setModelChoice(e.target.value)}>
                 <option value="">--Please choose an option--</option>
-                <option value="GPT-3">GPT-3</option>
+                <option value="gpt3">GPT-3</option>
                 <option value="GPT-4">GPT-4</option>
                 {/* Add other options as needed */}
               </select>

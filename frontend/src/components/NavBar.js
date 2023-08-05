@@ -6,7 +6,7 @@ function Navbar() {
       </div>
       <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
         <div className="text-sm lg:flex-grow">
-          <a href="/qa" className="inline-block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
+          <a href="/ask" className="inline-block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
             Q&A
           </a>
           {/* Add more links as needed */}
