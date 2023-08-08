@@ -9,6 +9,8 @@ function Navbar() {
           <a href="/ask" className="inline-block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
             Q&A
           </a>
+          <a href="/register" className="inline-block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">Register</a>
+          <a href="/login" className="inline-block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">Login</a>
           {/* Add more links as needed */}
         </div>
       </div>
