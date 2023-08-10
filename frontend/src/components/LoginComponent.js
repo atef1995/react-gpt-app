@@ -68,7 +68,10 @@ function LoginComponent() {
                         <input className="mb-4 p-2 w-full rounded border border-gray-300" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
                         {/* <input className="mb-4 p-2 w-full rounded border border-gray-300" type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} required /> */}
                         <input className="mb-4 p-2 w-full rounded border border-gray-300" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-                        <a href="/forgot-password" className="py-5 mb-4 font-mono text-blue-700 hover:text-blue-300 ">Forgot password?</a>
+                        <div className="mb-3">
+
+                            <a href="/forgot-password" className="font-mono text-blue-700 hover:text-blue-300 ">Forgot password?</a>
+                        </div>
                         <ButtonComponent label="Login" isLoading={isLoading} onClick={handleLogin} />
                     </form>
                 )}

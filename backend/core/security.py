@@ -1,4 +1,4 @@
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from .config import Config
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -29,7 +29,11 @@ def verify_password_reset_token(token: str):
     try:
         data = s.loads(token, max_age=3600)  # max_age: 1 hour in seconds
         return data.get("reset_password")
-    except:
+    except SignatureExpired:
+        print("Token has expired!")
+        return None
+    except BadSignature:
+        print("Token is invalid!")
         return None
 
 
