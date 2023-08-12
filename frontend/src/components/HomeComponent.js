@@ -3,7 +3,7 @@ import APIFormComponent from './APIFormComponent'
 
 function HomeComponent() {
   return (
-    <div className='bg-gradient-to-r from-slate-50 via-slate-200 to-gray-100 animate-gradient-x' >
+    <div className='bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 ' >
       <div className='text-center text-3xl font-semibold tracking-wide py-6'>
         <h1 className='text-blue-500 antialiased font-sans font-light tracking-wide leading-loose'>Welcome to PDF to GPT</h1>
       </div>

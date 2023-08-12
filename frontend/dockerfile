@@ -1,0 +1,32 @@
+# Step 1: Build the React application
+FROM node:14 AS build
+
+# Set working directory
+WORKDIR /app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+
+RUN npm install
+
+# Copy all source files from the current directory to the work dir in the container
+COPY . .
+
+# Build the app
+RUN npm run build
+
+# Step 2: Serve the React application from Nginx
+FROM nginx:1.19.0-alpine
+
+# Copy the custom nginx.conf file
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the react build from Step 1
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]

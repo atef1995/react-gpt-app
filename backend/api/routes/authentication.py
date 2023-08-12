@@ -16,6 +16,7 @@ from models.user import UserData
 from core.email_util import send_email
 import logging
 from pydantic import BaseModel
+from redis import asyncio as aioredis
 
 
 class RegisterPayload(BaseModel):
@@ -27,10 +28,11 @@ class RegisterPayload(BaseModel):
 router = APIRouter()
 
 
-@router.on_event("startup")
-async def startup():
-    # Configure it to use Redis. You can also configure it to use in-memory storage.
-    await FastAPILimiter.init(redis_url="redis://localhost", prefix="limiter")
+# @router.on_event("startup")
+# async def startup():
+#     # Configure it to use Redis. You can also configure it to use in-memory storage.
+#     redis = await aioredis.from_url("redis://localhost")
+#     await FastAPILimiter.init(redis=redis, prefix="limiter")
 
 
 @router.post("/register/")
