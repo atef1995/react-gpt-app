@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from .routes import authentication, document_operations
+from .routes import pdf_routes
+from .routes import authentication
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,4 +21,5 @@ app.add_middleware(
 )
 
 app.include_router(authentication.router)
-app.include_router(document_operations.router)
+
+app.include_router(pdf_routes.router, prefix="/pdf", tags=["pdf"])

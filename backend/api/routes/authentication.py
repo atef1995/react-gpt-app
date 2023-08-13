@@ -17,6 +17,9 @@ from core.email_util import send_email
 import logging
 from pydantic import BaseModel
 from redis import asyncio as aioredis
+from core.logger import logger
+
+logger.info("this is authentication")
 
 
 class RegisterPayload(BaseModel):
