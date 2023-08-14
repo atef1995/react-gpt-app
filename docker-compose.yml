@@ -12,6 +12,13 @@ services:
       context: ./backend
     ports:
       - "8000:8000"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
 
   filebeat:
     build:

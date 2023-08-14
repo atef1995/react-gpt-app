@@ -1,6 +1,9 @@
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from fastapi import HTTPException
 from .config import Config
 from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
+from datetime import timedelta
 
 s = URLSafeTimedSerializer(Config.SECRET_KEY)
 
@@ -13,8 +16,14 @@ def create_password_reset_token(email: str):
     return s.dumps({"reset_password": email})
 
 
-def create_session(user_id: int):
-    return s.dumps({"user_id": user_id})
+def create_access_token(user_id: int, duration: timedelta):
+    expiry = datetime.utcnow() + duration
+    return s.dumps({"user_id": user_id, "exp": expiry.timestamp()})
+
+
+def create_refresh_token(user_id: int, duration: timedelta):
+    expiry = datetime.utcnow() + duration
+    return s.dumps({"user_id": user_id, "exp": expiry.timestamp(), "type": "refresh"})
 
 
 def verify_email_token(token: str):
@@ -39,6 +48,15 @@ def verify_password_reset_token(token: str):
 
 def verify_password(stored_password, provided_password):
     return check_password_hash(stored_password, provided_password)
+
+
+def verify_token(token: str, token_type: str = "access"):
+    data = s.loads(token)
+    if "exp" in data and datetime.utcnow().timestamp() > data["exp"]:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    if token_type == "refresh" and data.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid token type")
+    return data["user_id"]
 
 
 def get_password_hash(password):

@@ -2,14 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
+from datetime import timedelta
 from core.security import (
     verify_password,
     get_password_hash,
-    create_session,
+    create_access_token,
+    create_refresh_token,
     create_email_verification_token,
     verify_email_token,
     create_password_reset_token,
     verify_password_reset_token,
+    verify_token,
 )
 from core.database import SessionLocal, or_, Session, get_db
 from models.user import UserData
@@ -31,11 +34,11 @@ class RegisterPayload(BaseModel):
 router = APIRouter()
 
 
-# @router.on_event("startup")
-# async def startup():
-#     # Configure it to use Redis. You can also configure it to use in-memory storage.
-#     redis = await aioredis.from_url("redis://localhost")
-#     await FastAPILimiter.init(redis=redis, prefix="limiter")
+@router.on_event("startup")
+async def startup():
+    # Configure it to use Redis. You can also configure it to use in-memory storage.
+    redis = await aioredis.from_url("redis://redis:6379")
+    await FastAPILimiter.init(redis=redis, prefix="limiter")
 
 
 @router.post("/register/")
@@ -86,11 +89,32 @@ def login(
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
-    print("login reached")
     user = db.query(UserData).filter(UserData.username == form_data.username).first()
     if not user or not verify_password(user.hashed_password, form_data.password):
         raise HTTPException(status_code=401, detail="Incorrect credentials")
-    access_token = create_session(user.id)
+
+    # Set a duration for access token, e.g., 15 minutes
+    access_token_expires = timedelta(minutes=15)
+    access_token = create_access_token(user.id, access_token_expires)
+
+    # Set a duration for refresh token, e.g., 1 day
+    refresh_token_expires = timedelta(days=1)
+    refresh_token = create_refresh_token(user.id, refresh_token_expires)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "refresh_token": refresh_token,
+    }
+
+
+@router.post("/token/refresh")
+async def refresh_token(refresh_token: str):
+    user_id = verify_token(refresh_token, token_type="refresh")
+
+    # Issue a new access token
+    access_token_expires = timedelta(minutes=15)
+    access_token = create_access_token(user_id, access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -100,7 +124,6 @@ async def forgot_password(
     db: Session = Depends(get_db),
     _=Depends(RateLimiter(times=5, minutes=1)),
 ):
-    print("forgot-password reached")
     user = db.query(UserData).filter(UserData.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
