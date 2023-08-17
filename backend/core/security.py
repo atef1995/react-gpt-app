@@ -2,8 +2,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from fastapi import HTTPException
 from .config import Config
 from werkzeug.security import generate_password_hash, check_password_hash
-import datetime
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 s = URLSafeTimedSerializer(Config.SECRET_KEY)
 

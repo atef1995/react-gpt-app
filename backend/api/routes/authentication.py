@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
-from datetime import timedelta
+import logging
+from datetime import timedelta, datetime
 from core.security import (
     verify_password,
     get_password_hash,
@@ -14,13 +15,18 @@ from core.security import (
     verify_password_reset_token,
     verify_token,
 )
+from api.dependencies.token_operations import (
+    store_refresh_token,
+    invalidate_refresh_token_for_user,
+    verify_and_get_user_from_refresh_token,
+)
+from core.utils import get_current_session
 from core.database import SessionLocal, or_, Session, get_db
-from models.user import UserData
+from core.logger import logger
 from core.email_util import send_email
-import logging
+from models.user import UserData, RefreshToken
 from pydantic import BaseModel
 from redis import asyncio as aioredis
-from core.logger import logger
 
 logger.info("this is authentication")
 
@@ -86,36 +92,102 @@ def verify(token: str, db: Session = Depends(get_db)):
 
 @router.post("/login/")
 def login(
+    response: Response,
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     user = db.query(UserData).filter(UserData.username == form_data.username).first()
-    if not user or not verify_password(user.hashed_password, form_data.password):
+
+    if not user:
+        logger.warning(
+            f"Login attempt with non-existent username: {form_data.username}"
+        )
         raise HTTPException(status_code=401, detail="Incorrect credentials")
 
-    # Set a duration for access token, e.g., 15 minutes
-    access_token_expires = timedelta(minutes=15)
-    access_token = create_access_token(user.id, access_token_expires)
+    if not verify_password(user.hashed_password, form_data.password):
+        logger.warning(f"Invalid password attempt for username: {form_data.username}")
+        raise HTTPException(status_code=401, detail="Incorrect credentials")
 
-    # Set a duration for refresh token, e.g., 1 day
-    refresh_token_expires = timedelta(days=1)
-    refresh_token = create_refresh_token(user.id, refresh_token_expires)
+    try:
+        # Set a duration for access token, e.g., 15 minutes
+        access_token_expires = timedelta(minutes=15)
+        access_token = create_access_token(user.id, access_token_expires)
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "refresh_token": refresh_token,
-    }
+        # Set a duration for refresh token, e.g., 1 day
+        refresh_token_expires = timedelta(days=1)
+        refresh_token = create_refresh_token(user.id, refresh_token_expires)
+
+        # Calculate the exact datetime of expiration for storage
+        expiration_datetime = datetime.utcnow() + refresh_token_expires
+        store_refresh_token(user.id, refresh_token, expiration_datetime)
+
+        is_secure = (
+            False  # or False if you're in a development environment without HTTPS
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            domain="localhost",
+            path="/",
+        )
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            domain="localhost",
+            path="/",
+            max_age=900,  # 15 minutes in seconds
+        )
+
+        return {
+            # "access_token": access_token,
+            "message": "Login successful",
+            "token_type": "bearer",
+            # "refresh_token": refresh_token,
+        }
+
+    except Exception as e:
+        # In production, do not expose the raw error message to the client.
+        # Instead, log the exception for debugging.
+        logger.error(f"Error during login for username {form_data.username}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@router.post("/token/refresh")
+@router.get("/verify-access-token/")
+async def verify_access_token(request: Request, db: Session = Depends(get_db)):
+    token = request.cookies.get("access_token")
+    logger.info(token)
+    ver_token = db.query(RefreshToken).filter(RefreshToken.token == token).first()
+    if ver_token is not None:
+        return {"status": "valid"}
+    logger.error(f"Error during verifying access token {ver_token}")
+    raise HTTPException(status_code=401, detail="Internal Server Error")
+
+
+@router.post("/refresh-token")
 async def refresh_token(refresh_token: str):
-    user_id = verify_token(refresh_token, token_type="refresh")
-
-    # Issue a new access token
-    access_token_expires = timedelta(minutes=15)
-    access_token = create_access_token(user_id, access_token_expires)
+    user_id = verify_and_get_user_from_refresh_token(refresh_token)
+    if user_id:
+        # Issue a new access token
+        access_token_expires = timedelta(minutes=15)
+        access_token = create_access_token(user_id, access_token_expires)
+    else:
+        return False
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/logout/")
+async def logout(current_session: dict = Depends(get_current_session)):
+    user_id = current_session.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Invalid session data")
+
+    # Invalidate the refresh token for the user.
+    invalidate_refresh_token_for_user(user_id)
+    return {"detail": "Logged out successfully"}
 
 
 @router.post("/forgot-password/")

@@ -1,4 +1,4 @@
-from .config import s
+from .security import s
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import HTTPException, Depends
 from itsdangerous import (

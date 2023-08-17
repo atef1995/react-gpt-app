@@ -19,7 +19,7 @@ function QAComponent() {
         e.preventDefault();
         // call your API, pass `question` as a parameter
         try {
-            const response = await axios.post('http://127.0.0.1:8000/ask/', { question }, { withCredentials: true });
+            const response = await axios.post('/ask', { question }, { withCredentials: true });
             if (response.status === 200) {
                 setConversation(prevConversation => [...prevConversation, response.data]);
             }
