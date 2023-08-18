@@ -4,7 +4,6 @@ import QuestionForm from './QuestionForm';
 import ConversationHistory from './ConversationHistory';
 import axios from 'axios';
 
-
 function QAComponent() {
     const [summary, setSummary] = useState('');
     const [question, setQuestion] = useState('');
@@ -14,12 +13,13 @@ function QAComponent() {
         { question: "Mock Question 1?", answer: "Mock answer 1." },
         { question: "Mock Question 2?", answer: "Mock answer 2." },
     ]);
+    console.log('QA Component reached');
 
     async function submitQuestion(e) {
         e.preventDefault();
         // call your API, pass `question` as a parameter
         try {
-            const response = await axios.post('/ask', { question }, { withCredentials: true });
+            const response = await axios.post('ask/', { question }, { withCredentials: true });
             if (response.status === 200) {
                 setConversation(prevConversation => [...prevConversation, response.data]);
             }
@@ -54,10 +54,10 @@ function QAComponent() {
     // }
 
 
-    useEffect(() => {
-        // make an API call to get the summary when the page loads
-        // and store it in `summary`
-    }, []);
+    // useEffect(() => {
+    //     // make an API call to get the summary when the page loads
+    //     // and store it in `summary`
+    // }, []);
 
 
 

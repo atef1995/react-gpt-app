@@ -6,6 +6,10 @@ services:
       context: ./frontend
     ports:
       - "3000:80"
+    volumes: # <-- Add this
+      - ./frontend:/app # Maps your host machine's frontend code to / in the container
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
   backend:
     build:
@@ -15,6 +19,8 @@ services:
     depends_on:
       - redis
     # network_mode: "host"
+    volumes: # <-- Add this
+      - ./backend:/app # Maps your host machine's backend code to /app in the container
 
   redis:
     image: redis:latest

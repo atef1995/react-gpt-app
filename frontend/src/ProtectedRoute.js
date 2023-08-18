@@ -1,20 +1,24 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from './api';
-import { Route, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { Spinner } from "@material-tailwind/react";
+import AuthContext from './authContext';
 
-const ProtectedRoute = ({ element: Element, ...rest }) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const navigate = useNavigate();
+
+const ProtectedRoute = ({ children }) => {
+    const { isLoggedIn } = useContext(AuthContext);
+    const [isLoading, setIsLoading] = useState(!isLoggedIn);
+
+    console.log('Protected Route');
+    console.log('beginning: isLoggedIn: ' + isLoggedIn + 'isLoading' + isLoading);
 
     useEffect(() => {
-        console.log('verifying access token****************');
         api.get('verify-access-token/')
             .then((response) => {
+                console.log(response);
                 if (response.status === 200) {
-                    setIsAuthenticated(true);
-                    navigate('/ask');
+                    // This means token is valid. You can optionally update the context here.
+                    console.log(response);
                 }
             })
             .catch((error) => {
@@ -23,20 +27,22 @@ const ProtectedRoute = ({ element: Element, ...rest }) => {
             .finally(() => {
                 setIsLoading(false);
             });
-    }, []);
+    }, [isLoggedIn]);
 
     if (isLoading) {
         return <div className='flex items-center justify-center min-h-screen'><Spinner className='h-12 w-12' /></div>;
     }
-    if (!isAuthenticated) {
-        navigate("/login");
-        return <div className='flex items-center justify-center'><Spinner /></div> // This will render nothing while navigating
+
+    if (isLoggedIn) {
+        return children;
     }
 
-    return <Route {...rest} element={<Element />} />;
+    return <Navigate to={"/login"} />;  // At this point, user will have been navigated away to /login.
 }
 
 export default ProtectedRoute;
+
+
 
 // Start in a loading state (isLoading = true).
 // Once the component mounts (useEffect), it'll attempt to verify the access token.

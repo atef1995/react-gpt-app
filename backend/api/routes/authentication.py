@@ -159,14 +159,20 @@ def login(
 @router.get("/verify-access-token/")
 async def verify_access_token(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("access_token")
-    logger.info(token)
-    ver_token = db.query(RefreshToken).filter(RefreshToken.token == token).first()
-    if ver_token is not None:
-        return {"status": "valid"}
-    logger.error(f"Error during verifying access token {ver_token}")
-    raise HTTPException(status_code=401, detail="Internal Server Error")
+    if not token:
+        logger.error("Access token not found in cookies.")
+        raise HTTPException(status_code=401, detail="Token not found")
+
+    try:
+        user_id = verify_token(token)
+        logger.info(f"Token verified for user_id: {user_id}")
+        return {"status": "Token verified", "user_id": user_id}
+    except Exception as e:
+        logger.error(f"Error during verifying access token. Error: {str(e)}")
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
+# change to serialized or databased access token
 @router.post("/refresh-token")
 async def refresh_token(refresh_token: str):
     user_id = verify_and_get_user_from_refresh_token(refresh_token)

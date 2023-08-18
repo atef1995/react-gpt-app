@@ -13,11 +13,13 @@ function LoginComponent() {
     const [isLoading, setIsLoading] = useState(false);
     const { logIn } = useContext(AuthContext);
     // const [accessToken, setAccessToken] = useState(null);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
 
 
     const handleLogin = () => {
+        console.log('Login Reached');
+
         setIsLoading(true);
         setErrorMessage("");
         const formData = new URLSearchParams();
@@ -34,7 +36,7 @@ function LoginComponent() {
                 setMessage("Login successful")
 
                 logIn();
-                navigate('/ask');
+                // navigate('ask/');
             })
             .catch(error => {
                 let errMsg = "Login error";  // Default message

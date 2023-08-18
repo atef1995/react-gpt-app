@@ -22,6 +22,7 @@ function App() {
     setIsLoggedIn(false);
   };
 
+  console.log('app.js' + isLoggedIn);
   return (
     <BrowserRouter>
       <AuthContext.Provider value={{ isLoggedIn, logIn, logOut }}>
@@ -29,11 +30,13 @@ function App() {
         <Routes>
           <Route path="/" element={<HomeComponent />} />
           <Route path="/ask" element={<ProtectedRoute><QAComponent /></ProtectedRoute>} />
+          {/* <Route path="/ask" element={<QAComponent />} /> */}
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/logout" element={<LogoutComponent />} />
           <Route path='/register' element={<RegisterComponent />} />
           <Route path='/forgot-password' element={<ForgotPasswordComponent />} />
           <Route path='/verify-reset-token' element={<ResetPasswordPage />} />
+          <Route path="*" element={<div>Not Found</div>} />
         </Routes>
       </AuthContext.Provider>
     </BrowserRouter>
