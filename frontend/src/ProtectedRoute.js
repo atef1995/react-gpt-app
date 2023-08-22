@@ -6,7 +6,7 @@ import AuthContext from './authContext';
 
 
 const ProtectedRoute = ({ children }) => {
-    const { isLoggedIn } = useContext(AuthContext);
+    const { isLoggedIn, logIn, logOut } = useContext(AuthContext);
     const [isLoading, setIsLoading] = useState(!isLoggedIn);
 
     console.log('Protected Route');
@@ -15,10 +15,13 @@ const ProtectedRoute = ({ children }) => {
     useEffect(() => {
         api.get('verify-access-token/')
             .then((response) => {
-                console.log(response);
                 if (response.status === 200) {
                     // This means token is valid. You can optionally update the context here.
-                    console.log(response);
+                    logIn();
+                    // console.log(response.message);
+                }
+                else {
+                    logOut();
                 }
             })
             .catch((error) => {

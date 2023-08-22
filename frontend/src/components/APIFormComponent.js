@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../api';
 
 
 const APIFormComponent = () => {
@@ -21,12 +22,7 @@ const APIFormComponent = () => {
     formData.append('pdf_file', selectedFile);
     formData.append('model_choice', modelChoice);
     formData.append('api_key', apiKey);
-    axios.post('http://127.0.0.1:8000/upload/', formData, {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer`
-      }
+    api.post('upload/', formData, {
     })
       .then(response => {
         console.log(response.data);

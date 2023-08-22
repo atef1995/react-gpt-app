@@ -1,29 +1,34 @@
-import { React, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useContext, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import api from '../api';
+import AuthContext from '../authContext';
 
 const LogoutComponent = () => {
-    const navigate = useNavigate();
+    const { logOut } = useContext(AuthContext);
+    const [message, setMessage] = useState('');
+
 
     useEffect(() => {
         // Call the logout endpoint from your backend
-        axios.post('http://127.0.0.1:8000/logout/')
+        api.get('logout')
             .then(response => {
-                // Remove token or session info from local storage or wherever you've stored it
-                localStorage.removeItem('token');
-
-                // Redirect to login or another appropriate page
-                navigate('/login');
+                if (response.status === 200) {
+                    setMessage('Logged out');
+                    logOut();
+                }
             })
             .catch(error => {
+                setMessage(error.message);
                 // Handle any errors during logout
                 console.error('Error during logout:', error);
-            });
-    }, [navigate]);
+            })
+            .finally(() => logOut());
+    }, []);
 
     return (
         <div>
-            Logging out...
+            {message}
+            <Navigate to='login' />
         </div>
     );
 }

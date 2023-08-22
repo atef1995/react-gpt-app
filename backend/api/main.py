@@ -22,4 +22,7 @@ app.add_middleware(
 
 app.include_router(authentication.router)
 
-app.include_router(pdf_routes.router, prefix="/pdf", tags=["pdf"])
+app.include_router(pdf_routes.router)
+
+# i dont know if i need this
+# , prefix="/pdf", tags=["pdf"]

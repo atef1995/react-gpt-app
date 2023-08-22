@@ -1,5 +1,5 @@
 import { React, useState, useContext } from "react";
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import ButtonComponent from "./ButtonComponent";
 import AuthContext from "../authContext";
 import api from "../api";
@@ -13,8 +13,6 @@ function LoginComponent() {
     const [isLoading, setIsLoading] = useState(false);
     const { logIn } = useContext(AuthContext);
     // const [accessToken, setAccessToken] = useState(null);
-    // const navigate = useNavigate();
-
 
 
     const handleLogin = () => {
@@ -34,9 +32,8 @@ function LoginComponent() {
             .then(response => {
                 console.log(response.data);
                 setMessage("Login successful")
-
                 logIn();
-                // navigate('ask/');
+                return <Navigate to={'/ask'} />
             })
             .catch(error => {
                 let errMsg = "Login error";  // Default message
@@ -66,12 +63,12 @@ function LoginComponent() {
             <div className="flex flex-col items-center justify-center rounded-lg shadow-sm hover:shadow-2xl transition-shadow duration-500 bg-gray-50 py-4 px-4 sm:px-6 lg:px-8 w-96"> {/* w-96 sets a fixed width, adjust as needed */}
 
                 <form className="w-full"> {/* Make the form take the full width of the card */}
-                    <h1 className="font-mono py-4 text-center">Login Form</h1>
+                    <h1 className="font-mono py-4 text-center">Login Form 4</h1>
                     {
                         errorMessage
                             ? <p className="mb-4 font-mono text-center text-black-500 bg-red-500 rounded border">{errorMessage}</p>
                             : message
-                                ? <p className="mb-4 text-center font-mono text-green-300 bg-green-700 rounded border animate-bounce ">{message}<a href="/login" className="text-blue-700 hover:text-blue-400">{"Login here."}</a></p>
+                                ? <p className="mb-4 text-center font-mono text-green-300 bg-green-700 rounded border animate-bounce ">{message}</p>
                                 : null
                     }
                     <input className="mb-4 p-2 w-full rounded border border-gray-300" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />

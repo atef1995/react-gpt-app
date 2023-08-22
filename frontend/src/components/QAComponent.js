@@ -3,6 +3,9 @@ import SummaryDisplay from './SummaryDisplay';
 import QuestionForm from './QuestionForm';
 import ConversationHistory from './ConversationHistory';
 import axios from 'axios';
+import { Spinner } from "@material-tailwind/react";
+import api from '../api';
+
 
 function QAComponent() {
     const [summary, setSummary] = useState('');
@@ -13,13 +16,13 @@ function QAComponent() {
         { question: "Mock Question 1?", answer: "Mock answer 1." },
         { question: "Mock Question 2?", answer: "Mock answer 2." },
     ]);
-    console.log('QA Component reached');
+    console.log('QA Component reached 2');
 
     async function submitQuestion(e) {
         e.preventDefault();
         // call your API, pass `question` as a parameter
         try {
-            const response = await axios.post('ask/', { question }, { withCredentials: true });
+            const response = await api.post('ask/', { question }, { withCredentials: true });
             if (response.status === 200) {
                 setConversation(prevConversation => [...prevConversation, response.data]);
             }

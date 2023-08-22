@@ -157,16 +157,18 @@ def login(
 
 
 @router.get("/verify-access-token/")
-async def verify_access_token(request: Request, db: Session = Depends(get_db)):
-    token = request.cookies.get("access_token")
-    if not token:
-        logger.error("Access token not found in cookies.")
+async def verify_access_token(request: Request):
+    refresh_token = request.cookies.get("refresh_token")
+    access_token = request.cookies.get("access_token")
+    if not refresh_token and not access_token:
+        logger.error("Access token not found")
         raise HTTPException(status_code=401, detail="Token not found")
 
     try:
-        user_id = verify_token(token)
-        logger.info(f"Token verified for user_id: {user_id}")
-        return {"status": "Token verified", "user_id": user_id}
+        user_id = verify_token(access_token), verify_token(refresh_token)
+
+        logger.info(f"Token verified {user_id}")
+        return {"status": "Token verified"}
     except Exception as e:
         logger.error(f"Error during verifying access token. Error: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -185,14 +187,25 @@ async def refresh_token(refresh_token: str):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/logout/")
-async def logout(current_session: dict = Depends(get_current_session)):
-    user_id = current_session.get("user_id")
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Invalid session data")
+@router.get("/logout/")
+async def logout(
+    response: Response,
+    request: Request,
+    _=Depends(RateLimiter(times=5, minutes=1)),
+):
+    # refresh_token = request.cookies.get("refresh_token")
+    # access_token = request.cookies.get("access_token")
+    # if not refresh_token:
+    #     raise HTTPException(status_code=401, detail="Error log out")
+    # if not access_token:
+    #     raise HTTPException(status_code=401, detail="Error log out")
 
+    # verify_token(refresh_token, "refresh_token")
+    # verify_token(access_token, "access_token")
+    verify_access_token(request=request)
     # Invalidate the refresh token for the user.
-    invalidate_refresh_token_for_user(user_id)
+    response.delete_cookie("refresh_token")
+    response.delete_cookie("access_token")
     return {"detail": "Logged out successfully"}
 
 
