@@ -1,10 +1,49 @@
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends, Request
 from .config import Config
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime
+from sqlalchemy.orm import Session
+from core.database import get_db
+from models.crud import get_user
+from models.user import UserData
+from cryptography.fernet import Fernet
+
 
 s = URLSafeTimedSerializer(Config.SECRET_KEY)
+
+
+def get_token_from_cookie(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication token is missing")
+    return token
+
+
+def get_current_user(
+    token: str = Depends(get_token_from_cookie),
+    db: Session = Depends(get_db),
+) -> UserData:
+    try:
+        payload = s.loads(token)
+        user_id = payload["user_id"]
+        user = get_user(db, user_id=user_id)
+        if user is None:
+            raise HTTPException(status_code=400, detail="User not found")
+        return user
+    except (BadSignature, SignatureExpired):
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+
+def get_user_api_key(current_user: str = Depends(get_current_user)):
+    SECRET_KEY = Fernet.generate_key()
+    try:
+        # Retrieve encrypted API key and decrypt it
+        cipher_suite = Fernet(SECRET_KEY)
+        decrypted_api_key = cipher_suite.decrypt(current_user.api_key).decode()
+        return decrypted_api_key
+    except:
+        raise HTTPException(status_code=400, detail="Invalid or expired api_key")
 
 
 def create_email_verification_token(email: str):

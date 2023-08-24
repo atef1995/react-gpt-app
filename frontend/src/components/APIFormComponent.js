@@ -15,15 +15,17 @@ const APIFormComponent = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true); // start loading
-    // Here you would handle the form submission.
-    // You might send a request to your backend, for example.
-    // console.log(apiKey, selectedFile, modelChoice);
+
     const formData = new FormData();
-    formData.append('pdf_file', selectedFile);
+    formData.append('file', selectedFile);
     formData.append('model_choice', modelChoice);
-    formData.append('api_key', apiKey);
-    api.post('upload/', formData, {
-    })
+    // formData.append('api_key', apiKey);
+
+    api.post('/set-api-key/?api_key=${apiKey}', apiKey)
+      .then((response) => { console.log(response.message); })
+      .catch((error) => { console.log(error.message); })
+
+    api.post('upload/', formData)
       .then(response => {
         console.log(response.data);
         navigate('/ask');

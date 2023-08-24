@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker, Session
 from .config import Config
+from models.user import UserData
+
 
 engine = create_engine(Config.DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)

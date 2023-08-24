@@ -15,16 +15,12 @@ from core.security import (
     verify_password_reset_token,
     verify_token,
 )
-from api.dependencies.token_operations import (
-    store_refresh_token,
-    invalidate_refresh_token_for_user,
-    verify_and_get_user_from_refresh_token,
-)
+
 from core.utils import get_current_session
-from core.database import SessionLocal, or_, Session, get_db
+from core.database import or_, Session, get_db
 from core.logger import logger
 from core.email_util import send_email
-from models.user import UserData, RefreshToken
+from models.user import UserData
 from pydantic import BaseModel
 from redis import asyncio as aioredis
 
@@ -119,7 +115,7 @@ def login(
 
         # Calculate the exact datetime of expiration for storage
         expiration_datetime = datetime.utcnow() + refresh_token_expires
-        store_refresh_token(user.id, refresh_token, expiration_datetime)
+        # store_refresh_token(user.id, refresh_token, expiration_datetime)
 
         is_secure = (
             False  # or False if you're in a development environment without HTTPS
@@ -175,16 +171,16 @@ async def verify_access_token(request: Request):
 
 
 # change to serialized or databased access token
-@router.post("/refresh-token")
-async def refresh_token(refresh_token: str):
-    user_id = verify_and_get_user_from_refresh_token(refresh_token)
-    if user_id:
-        # Issue a new access token
-        access_token_expires = timedelta(minutes=15)
-        access_token = create_access_token(user_id, access_token_expires)
-    else:
-        return False
-    return {"access_token": access_token, "token_type": "bearer"}
+# @router.post("/refresh-token")
+# async def refresh_token(refresh_token: str):
+#     # user_id = verify_and_get_user_from_refresh_token(refresh_token)
+#     if user_id:
+#         # Issue a new access token
+#         access_token_expires = timedelta(minutes=15)
+#         access_token = create_access_token(user_id, access_token_expires)
+#     else:
+#         return False
+#     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.get("/logout/")
@@ -193,15 +189,6 @@ async def logout(
     request: Request,
     _=Depends(RateLimiter(times=5, minutes=1)),
 ):
-    # refresh_token = request.cookies.get("refresh_token")
-    # access_token = request.cookies.get("access_token")
-    # if not refresh_token:
-    #     raise HTTPException(status_code=401, detail="Error log out")
-    # if not access_token:
-    #     raise HTTPException(status_code=401, detail="Error log out")
-
-    # verify_token(refresh_token, "refresh_token")
-    # verify_token(access_token, "access_token")
     verify_access_token(request=request)
     # Invalidate the refresh token for the user.
     response.delete_cookie("refresh_token")

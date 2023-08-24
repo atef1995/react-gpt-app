@@ -16,13 +16,12 @@ function QAComponent() {
         { question: "Mock Question 1?", answer: "Mock answer 1." },
         { question: "Mock Question 2?", answer: "Mock answer 2." },
     ]);
-    console.log('QA Component reached 2');
 
     async function submitQuestion(e) {
         e.preventDefault();
         // call your API, pass `question` as a parameter
         try {
-            const response = await api.post('ask/', { question }, { withCredentials: true });
+            const response = await api.post('ask/', { question });
             if (response.status === 200) {
                 setConversation(prevConversation => [...prevConversation, response.data]);
             }
