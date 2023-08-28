@@ -9,6 +9,8 @@ const APIFormComponent = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [modelChoice, setModelChoice] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
 
@@ -22,11 +24,18 @@ const APIFormComponent = () => {
     // formData.append('api_key', apiKey);
 
     api.post('/set-api-key/?api_key=${apiKey}', apiKey)
-      .then((response) => { console.log(response.message); })
-      .catch((error) => { console.log(error.message); })
+      .then((response) => {
+        console.log(response.message);
+        setMessage(response.message);
+      })
+      .catch((error) => {
+        console.log(error.message);
+        setErrorMessage(error.message);
+      })
 
     api.post('upload/', formData)
       .then(response => {
+        setMessage(response.detail);
         console.log(response.data);
         navigate('/ask');
         return response.data;
@@ -35,7 +44,8 @@ const APIFormComponent = () => {
         console.log(data);
       })
       .catch(error => {
-        console.log(error);
+        console.log(error)
+        setErrorMessage(error.response.data.detail);;
         setLoading(false);
       });
   };
@@ -48,6 +58,14 @@ const APIFormComponent = () => {
     <div className="flex items-center justify-center rounded-lg shadow-sm hover:shadow-2xl transition-shadow duration-500 bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <h1>fill in the fields</h1>
+          {
+            errorMessage
+              ? <p className="mb-4 font-mono text-center text-black-500 bg-red-500 rounded border">{errorMessage}</p>
+              : message
+                ? <p className="mb-4 text-center font-mono text-green-300 bg-green-700 rounded border animate-bounce ">{message}</p>
+                : null
+          }
           <div className="rounded-md shadow-sm space-y-3">
             <div>
               <label htmlFor="API-Key" className="sr-only">API Key</label>
@@ -61,8 +79,8 @@ const APIFormComponent = () => {
               <label htmlFor="Model-Choice" className="sr-only">Model Choice</label>
               <select id="Model-Choice" name="Model Choice" required className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" value={modelChoice} onChange={e => setModelChoice(e.target.value)}>
                 <option value="">--Please choose an option--</option>
-                <option value="gpt3">GPT-3</option>
-                <option value="GPT-4">GPT-4</option>
+                <option value="gpt-3">GPT-3</option>
+                <option value="gpt-4">GPT-4</option>
                 {/* Add other options as needed */}
               </select>
             </div>

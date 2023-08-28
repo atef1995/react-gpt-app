@@ -21,7 +21,7 @@ function QAComponent() {
         e.preventDefault();
         // call your API, pass `question` as a parameter
         try {
-            const response = await api.post('ask/', { question });
+            const response = await api.post('/ask/', { question });
             if (response.status === 200) {
                 setConversation(prevConversation => [...prevConversation, response.data]);
             }

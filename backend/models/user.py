@@ -27,6 +27,7 @@ class UserData(Base):
     password_reset_token = Column(String, index=True)
     model_choice = Column(String, index=True)
     api_key = Column(String)
+    file_path = Column(String, index=True)
 
 
 Base.metadata.create_all(bind=engine)

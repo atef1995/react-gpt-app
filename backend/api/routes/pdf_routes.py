@@ -2,16 +2,27 @@
 import os
 from fastapi import Depends
 from models.user import UserData
-from core.database import or_, Session, get_db
-from core.security import get_current_user
+from core.database import Session, get_db
+from core.security import (
+    get_current_user,
+    get_user_api_key,
+    get_token_from_cookie,
+    SECRET_KEY,
+)
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Body
 from services import pdf_service
 import shutil
 from typing import Optional
 from cryptography.fernet import Fernet
+from pydantic import BaseModel
+
+
+class QuestionModel(BaseModel):
+    question: str
+    section: Optional[int] = None
+
 
 router = APIRouter()
-SECRET_KEY = Fernet.generate_key()
 
 
 @router.post("/set-api-key/")
@@ -20,11 +31,20 @@ async def set_api_key(
     db: Session = Depends(get_db),
     current_user: UserData = Depends(get_current_user),
 ):
-    cipher_suite = Fernet(SECRET_KEY)
-    encrypted_api_key = cipher_suite.encrypt(api_key.encode())
+    print("setting api key" + api_key)
 
-    current_user.api_key = encrypted_api_key
+    # Encrypt the API key
+    cipher_suite = Fernet(SECRET_KEY)
+    encrypted_api_key_bytes = cipher_suite.encrypt(api_key.encode())
+
+    # Decode it as UTF-8 to store as a string in the database
+    encrypted_api_key_str = encrypted_api_key_bytes.decode("utf-8")
+
+    # Update the user record in the database
+    current_user.api_key = encrypted_api_key_str
+    db.add(current_user)
     db.commit()
+    print("added to api db" + current_user.api_key)
 
     return {"detail": "API key set successfully"}
 
@@ -36,6 +56,12 @@ async def upload_pdf(
     db: Session = Depends(get_db),
     current_user: UserData = Depends(get_current_user),
 ):
+    print("Uploading...")
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=400, detail="Invalid file type. Please upload a PDF."
+        )
+
     # Ensure the directory exists
     temp_files_dir = "temp_files"
     os.makedirs(temp_files_dir, exist_ok=True)
@@ -51,40 +77,40 @@ async def upload_pdf(
     current_user.file_path = file_path
     current_user.model_choice = model_choice
     db.commit()
-
-    context = pdf_service.extract_text_from_pdf(file_path)
-    return {
-        "status": "success"
-    }  # You might return a status or some information about the extracted text
+    print("added file path" + current_user.file_path)
+    # context = pdf_service.extract_text_from_pdf(file_path)
+    return {"status": "success"}
 
 
-# ask page
 @router.post("/ask/")
 async def ask_question(
-    question: str,
-    section: Optional[
-        int
-    ] = None,  # This could be used to specify a particular section of the document
-    db: Session = Depends(get_db),
+    payload: QuestionModel,
     current_user: UserData = Depends(get_current_user),
+    # db: Session = Depends(get_db),
+    # token: str = Depends(get_token_from_cookie),
+    api_key: str = Depends(get_user_api_key)
+    # current_user: UserData = Depends(get_current_user),
 ):
+    question = payload.question
     # Retrieve the file path and extract the appropriate context
     file_path = current_user.file_path
-    context = pdf_service.get_context_from_file(file_path, section)
+    print(file_path)
+    if file_path is None:
+        raise HTTPException(status_code=400, detail="File path is not set")
 
-    # Make sure the context is within the token limit, if needed
-    model_choice_gpt3 = (
-        db.query(UserData).filter(UserData.model_choice == "gpt-3").first()
-    )
-    model_choice_gpt4 = (
-        db.query(UserData).filter(UserData.model_choice == "gpt-4").first()
-    )
+    context = pdf_service.extract_text_from_pdf(file_path)
+    if context is None:
+        raise HTTPException(status_code=400, detail="Failed to extract text from PDF")
+    # print(current_user.__dict__)
+    # Get the user's API key
+    print("api key in" + api_key)
 
     # Ask the question
-    if model_choice_gpt3:
-        response = pdf_service.generate_with_gpt3(context, question)
-
-    elif model_choice_gpt4:
-        response = pdf_service.generate_with_gpt3(context, question)
+    if current_user.model_choice == "gpt-3":
+        response = pdf_service.generate_with_gpt3(context, question, api_key=api_key)
+    elif current_user.model_choice == "gpt-4":
+        response = pdf_service.generate_with_gpt4(context, question, api_key=api_key)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid model choice")
 
     return {"response": response}

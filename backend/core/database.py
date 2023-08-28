@@ -10,6 +10,7 @@ SessionLocal = sessionmaker(bind=engine)
 
 def get_db():
     db = SessionLocal()
+    print("Inside get_db, DB type: ", type(db))
     try:
         yield db
     finally:
