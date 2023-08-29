@@ -6,7 +6,6 @@ from core.database import Session, get_db
 from core.security import (
     get_current_user,
     get_user_api_key,
-    get_token_from_cookie,
     SECRET_KEY,
 )
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Body
@@ -86,10 +85,7 @@ async def upload_pdf(
 async def ask_question(
     payload: QuestionModel,
     current_user: UserData = Depends(get_current_user),
-    # db: Session = Depends(get_db),
-    # token: str = Depends(get_token_from_cookie),
-    api_key: str = Depends(get_user_api_key)
-    # current_user: UserData = Depends(get_current_user),
+    api_key: str = Depends(get_user_api_key),
 ):
     question = payload.question
     # Retrieve the file path and extract the appropriate context

@@ -1,82 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SummaryDisplay from './SummaryDisplay';
 import QuestionForm from './QuestionForm';
 import ConversationHistory from './ConversationHistory';
-import axios from 'axios';
-import { Spinner } from "@material-tailwind/react";
 import api from '../api';
-
+import { Spinner } from "@material-tailwind/react";
 
 function QAComponent() {
     const [summary, setSummary] = useState('');
     const [question, setQuestion] = useState('');
+    const [loading, setLoading] = useState(false);
     const [conversation, setConversation] = useState([
-        { question: "Mock Question 1?", answer: "Mock answer 1." },
-        { question: "Mock Question 2?", answer: "Mock answer 2." },
-        { question: "Mock Question 1?", answer: "Mock answer 1." },
-        { question: "Mock Question 2?", answer: "Mock answer 2." },
     ]);
 
     async function submitQuestion(e) {
         e.preventDefault();
-        // call your API, pass `question` as a parameter
         try {
+            setLoading(true);
             const response = await api.post('/ask/', { question });
             if (response.status === 200) {
-                setConversation(prevConversation => [...prevConversation, response.data]);
+                const newConversationEntry = { question: question, answer: response.data.response };
+                console.log(response.data); // Make sure this is the data structure you expect
+                setConversation(prevConversation => [...prevConversation, newConversationEntry]);
+                setQuestion('');
             }
         } catch (error) {
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-                console.log(error.response.data);
-                console.log(error.response.status);
-                console.log(error.response.headers);
-            } else if (error.request) {
-                // The request was made but no response was received
-                console.log(error.request);
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                console.log('Error', error.message);
-            }
-            console.log(error.config);
-
+            console.error('An error occurred:', error);
+        } finally {
+            setLoading(false)
         }
     }
 
-    // async function updateConversation() {
-    //     try {
-    //         const response = await axios.get('http://127.0.0.1:5000/ask');
-    //         if (response.status === 200) {
-    //             setConversation(response.data.qa_pairs);
-    //         }
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
-
-
-    // useEffect(() => {
-    //     // make an API call to get the summary when the page loads
-    //     // and store it in `summary`
-    // }, []);
-
-
-
-
     return (
-        // Your component code here...
-        <div className="p-6 md:p-12 lg:p-24 flex flex-col items-center justify-center">
-            <SummaryDisplay summary={summary} />
-            <QuestionForm
-                question={question}
-                setQuestion={setQuestion}
-                submitQuestion={submitQuestion}
-            />
-            <ConversationHistory conversation={conversation} />
+        <div className="p-6 md:p-12 lg:p-24 flex flex-col items-center justify-center relative">  {/* relative is NEW */}
+
+            {loading && (  // NEW
+                <div className="flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <Spinner color="blue" />
+                </div>
+            )}
+
+            <div className={`w-full flex flex-col items-center justify-center flex-shrink-0 ${loading ? 'blur-md' : ''} z-0`}> {/* blur is NEW */}
+                {/* <SummaryDisplay summary={summary} /> */}
+                <QuestionForm
+                    question={question}
+                    setQuestion={setQuestion}
+                    submitQuestion={submitQuestion}
+                />
+                <ConversationHistory conversation={conversation} />
+            </div>
         </div>
     );
 }
-
 
 export default QAComponent;

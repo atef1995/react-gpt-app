@@ -2,7 +2,7 @@ import React from "react";
 
 function ConversationHistory({ conversation }) {
     return (
-        <div className="my-4 px-4 sm:px-0 max-w-4xl w-full sm:w-3/4 mx-auto">
+        <div className="flex flex-col items-center my-4 px-4 sm:px-0 max-w-4xl w-full sm:w-3/4 mx-auto">
             <h2 className="mt-10">Conversation History</h2>
             {conversation.map((pair, index) => (
                 <div key={index} className="mb-4">

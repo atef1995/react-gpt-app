@@ -20,21 +20,45 @@ def generate_with_gpt3(
     max_tokens: int = 2048,
 ) -> str:
     openai.api_key = api_key
-    response = openai.Completion.create(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        prompt=f"{context}\n\nUser: {question}\nAI:",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"{context}"},
+            {"role": "user", "content": f"{question}"},
+        ],
         max_tokens=max_tokens,
     )
-    return response.choices[0].text.strip()
+    return response["choices"][0]["message"]["content"].strip()
 
 
 def generate_with_gpt4(
-    context: str, question: str, api_key: str, max_tokens: int = 2048
+    context: str,
+    question: str,
+    api_key: str,
+    max_tokens: int = 2048,
+) -> str:
+    openai.api_key = api_key
+    # Assuming gpt-4 would also use Chat API
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"{context}"},
+            {"role": "user", "content": f"{question}"},
+        ],
+        max_tokens=max_tokens,
+    )
+    return response["choices"][0]["message"]["content"].strip()
+
+
+def generate_summary_with_gpt4(
+    context: str, api_key: str, max_tokens: int = 150
 ) -> str:
     openai.api_key = api_key
     response = openai.Completion.create(
         model="gpt-4",
-        prompt=f"{context}\n\nUser: {question}\nAI:",
+        prompt=f"Please summarize the following text:\n\n{context}\n\nSummary:",
         max_tokens=max_tokens,
     )
     return response.choices[0].text.strip()
