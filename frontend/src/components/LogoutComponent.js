@@ -13,7 +13,7 @@ const LogoutComponent = () => {
         api.get('logout')
             .then(response => {
                 if (response.status === 200) {
-                    setMessage('Logged out');
+                    setMessage('Logged out successfully');
                     logOut();
                 }
             })
@@ -27,8 +27,7 @@ const LogoutComponent = () => {
 
     return (
         <div>
-            {message}
-            <Navigate to='login' />
+            {<p className='text-center'>{message}</p>}
         </div>
     );
 }

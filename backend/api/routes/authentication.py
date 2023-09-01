@@ -24,8 +24,6 @@ from models.user import UserData
 from pydantic import BaseModel
 from redis import asyncio as aioredis
 
-logger.info("this is authentication")
-
 
 class RegisterPayload(BaseModel):
     username: str
@@ -55,14 +53,16 @@ def register(payload: RegisterPayload, db: Session = Depends(get_db)):
     )
     if user:
         raise HTTPException(status_code=400, detail="Username or email already exists.")
+    if len(payload.password) < 8:
+        raise HTTPException(
+            status_code=400, detail="password should be more than 8 characters"
+        )
     hashed_password = get_password_hash(payload.password)
     verification_token = create_email_verification_token(payload.email)
     new_user = UserData(
         username=payload.username, email=payload.email, hashed_password=hashed_password
     )
-    verification_link = (
-        f"https://yourfrontenddomain.com/verify-email?token={verification_token}"
-    )
+    verification_link = f"https://http://localhost:3000/verify/{verification_token}"
     db.add(new_user)
     db.commit()
     send_email(
@@ -81,9 +81,13 @@ def verify(token: str, db: Session = Depends(get_db)):
     user = db.query(UserData).filter(UserData.email == email).first()
     if not user:
         raise HTTPException(status_code=400, detail="User not found.")
-    user.is_verified = True
-    db.commit()
-    return {"message": "Email verified successfully"}
+    try:
+        user.is_verified = True
+        db.commit()
+        return {"message": "Email verified successfully"}
+    except:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Could not verify email.")
 
 
 @router.post("/login/")
@@ -92,6 +96,7 @@ def login(
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
+    # if "@" in form_data.username:
     user = db.query(UserData).filter(UserData.username == form_data.username).first()
 
     if not user:
@@ -103,6 +108,12 @@ def login(
     if not verify_password(user.hashed_password, form_data.password):
         logger.warning(f"Invalid password attempt for username: {form_data.username}")
         raise HTTPException(status_code=401, detail="Incorrect credentials")
+
+    if not user.is_verified:
+        logger.warning(f"unverified login attempt")
+        raise HTTPException(
+            status_code=401, detail="Unverified user, verify your email"
+        )
 
     try:
         # Set a duration for access token, e.g., 15 minutes

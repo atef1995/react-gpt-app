@@ -1,18 +1,18 @@
 import React from "react";
 
-function QuestionForm({ question, setQuestion, submitQuestion }) {
+function QuestionForm({ register, handleSubmit, loading }) {
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-white p-4 shadow-md">
-            <form onSubmit={submitQuestion} className="flex justify-center mx-auto max-w-4xl">
+        <div className="flex flex-col items-center justify-center w-full sticky bottom-0 mt-4 bg-blue-200/70 rounded-md p-3">
+            <form onSubmit={handleSubmit} className="flex items-center justify-center md:w-1/2 lg:w-3/4">
                 <input
+                    {...register('question')}
                     type="text"
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
                     placeholder="Ask your question..."
-                    className="flex-grow flex-shrink mr-4 p-2 rounded-md border-2 border-gray-300"
-                    style={{ maxWidth: 'calc(100% - 100px)' }}
+                    className="flex-grow flex-shrink  min-w-0 md:w-1/2 lg:w-3/4 p-2 rounded-md border-2 border-gray-300 mr-5"
+                    disabled={loading}
+                // style={{ maxWidth: 'calc(100% - 100px)' }}
                 />
-                <button type="submit" className="bg-blue-600 text-white p-2 rounded-md">
+                <button type="submit" disabled={loading} className="bg-blue-600 text-white p-2 rounded-md">
                     Submit
                 </button>
             </form>

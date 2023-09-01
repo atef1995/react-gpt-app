@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useParams } from "react-router-dom";
+import api from "../api";
 
-const Verification = ({ match }) => {
+const Verification = () => {
     const [loading, setLoading] = useState(true);
     const [success, setSuccess] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const { token } = useParams();
 
     useEffect(() => {
-        axios.get(`/verify/${match.params.token}`)
+        api.get(`/verify/${token}`)
             .then(response => {
                 // Handle success
                 console.log(`response: ${response.data}`);
@@ -20,7 +22,7 @@ const Verification = ({ match }) => {
                 setLoading(false);
                 setErrorMessage('Error verifying email. Please try again or contact support.');
             });
-    }, [match.params.token]);
+    }, [token]);
 
     if (loading) {
         return <div>Verifying...</div>;

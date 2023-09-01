@@ -3,6 +3,8 @@
 import openai
 from pdfminer.high_level import extract_text
 from core.security import get_user_api_key
+from fastapi import HTTPException
+from core.logger import logger
 
 
 # print("\n\nopenai key: ", openai.api_key, "\n\n")
@@ -38,18 +40,24 @@ def generate_with_gpt4(
     api_key: str,
     max_tokens: int = 2048,
 ) -> str:
-    openai.api_key = api_key
-    # Assuming gpt-4 would also use Chat API
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"{context}"},
-            {"role": "user", "content": f"{question}"},
-        ],
-        max_tokens=max_tokens,
-    )
-    return response["choices"][0]["message"]["content"].strip()
+    try:
+        openai.api_key = api_key
+        # Assuming gpt-4 would also use Chat API
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"{context}"},
+                {"role": "user", "content": f"{question}"},
+            ],
+            max_tokens=max_tokens,
+        )
+        return response["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        logger.error(e)
+        return HTTPException(
+            status_code=400, detail="Something went wrong, check your api key"
+        )
 
 
 def generate_summary_with_gpt4(
@@ -61,4 +69,5 @@ def generate_summary_with_gpt4(
         prompt=f"Please summarize the following text:\n\n{context}\n\nSummary:",
         max_tokens=max_tokens,
     )
+    print(response)
     return response.choices[0].text.strip()

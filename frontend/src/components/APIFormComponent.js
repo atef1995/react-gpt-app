@@ -57,7 +57,7 @@ const APIFormComponent = () => {
     <div className="flex items-center justify-center rounded-lg shadow-sm hover:shadow-2xl transition-shadow duration-500 bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <h1>fill in the fields</h1>
+          <h1>Fill in the fields</h1>
           {
             errorMessage
               ? <p className="mb-4 font-mono text-center text-black-500 bg-red-500 rounded border">{errorMessage}</p>
