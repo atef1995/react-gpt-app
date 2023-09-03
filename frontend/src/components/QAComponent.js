@@ -11,14 +11,6 @@ function QAComponent() {
     const [summary, setSummary] = useState('');
     const [loading, setLoading] = useState(false);
     const [conversation, setConversation] = useState([
-        { "question": "answer", "answer": "answer 1" },
-        { "question": "answer", "answer": "answer 1" },
-        { "question": "answer", "answer": "answer 1" },
-        { "question": "answer", "answer": "answer 1" },
-        { "question": "answer", "answer": "answer 1" },
-        { "question": "answer", "answer": "answer 1" },
-        { "question": "answer", "answer": "answer 1" },
-        { "question": "answer", "answer": "answer 1 anything answer 1 anything answer 1 anything answer 1 anything answer 1 anything answer 1 anything answer 1 anything answer 1 anything" },
     ]);
 
     const { register, handleSubmit, setValue } = useForm();
@@ -36,7 +28,8 @@ function QAComponent() {
             }
         } catch (error) {
             console.error('An error occurred:', error);
-            setConversation([...conversation, { "question": question, "answer": error.message }]);
+            const errorMessage = "Something went wrong, check and re-enter your API key and try again."
+            setConversation([...conversation, { question, answer: errorMessage, isError: true }]);
         } finally {
             setLoading(false);
         }
@@ -47,10 +40,10 @@ function QAComponent() {
     }
 
     return (
-        <div className="p-6 md:p-1 lg:p-3 flex flex-col items-center justify-center relative bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100">
+        <div className="min-h-screen p-6 md:p-1 lg:p-3 flex flex-col items-center justify-center relative bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100">
             {/* <SummaryDisplay summary={summary} /> */}
-            {/* <button onClick={scrollToBottom} className='fixed left-3'>Scroll to Bottom</button> */}
             <ConversationHistory conversation={conversation} />
+
             <QuestionForm
                 register={register}
                 handleSubmit={handleSubmit(submitQuestion)}

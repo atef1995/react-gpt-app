@@ -30,8 +30,6 @@ async def set_api_key(
     db: Session = Depends(get_db),
     current_user: UserData = Depends(get_current_user),
 ):
-    print("setting api key" + api_key)
-
     # Encrypt the API key
     cipher_suite = Fernet(SECRET_KEY)
     encrypted_api_key_bytes = cipher_suite.encrypt(api_key.encode())
@@ -43,7 +41,6 @@ async def set_api_key(
     current_user.api_key = encrypted_api_key_str
     db.add(current_user)
     db.commit()
-    print("added to api db" + current_user.api_key)
 
     return {"detail": "API key set successfully"}
 
@@ -97,9 +94,6 @@ async def ask_question(
     context = pdf_service.extract_text_from_pdf(file_path)
     if context is None:
         raise HTTPException(status_code=400, detail="Failed to extract text from PDF")
-    # print(current_user.__dict__)
-    # Get the user's API key
-    print("api key in" + api_key)
 
     # Ask the question
     if current_user.model_choice == "gpt-3":
