@@ -1,91 +1,105 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-
+import { useForm, Controller } from 'react-hook-form';
 
 const APIFormComponent = () => {
-  const [apiKey, setApiKey] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [modelChoice, setModelChoice] = useState('');
+  const { register, handleSubmit, watch, control, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleApi = (data) => {
+    const { apiKey, file, modelChoice } = data;
     setLoading(true); // start loading
-
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    formData.append('file', file[0]);
     formData.append('model_choice', modelChoice);
-    // formData.append('api_key', apiKey);
 
     api.post('/set-api-key/?api_key=${apiKey}', apiKey)
       .then((response) => {
-        console.log(response.message);
-        setMessage(response.message);
+        setMessage("Success api");
       })
       .catch((error) => {
-        console.log(error.message);
         setErrorMessage(error.message);
       })
 
     api.post('upload/', formData)
       .then(response => {
-        setMessage(response.detail);
-        console.log(response.data);
+        setMessage("Success!");
         navigate('/ask');
-        return response.data;
-      })
-      .then(data => {
-        console.log(data);
       })
       .catch(error => {
-        console.log(error)
-        setErrorMessage(error.response.data.detail);;
-        setLoading(false);
-      });
+        setErrorMessage(error.message);
+      })
+      .finally(setLoading(false));
   };
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
 
   return (
     <div className="flex items-center justify-center rounded-lg shadow-sm hover:shadow-2xl transition-shadow duration-500 bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <h1>Fill in the fields</h1>
-          {
-            errorMessage
-              ? <p className="mb-4 font-mono text-center text-black-500 bg-red-500 rounded border">{errorMessage}</p>
-              : message
-                ? <p className="mb-4 text-center font-mono text-green-300 bg-green-700 rounded border animate-bounce ">{message}</p>
-                : null
-          }
-          <div className="rounded-md shadow-sm space-y-3">
-            <div>
-              <label htmlFor="API-Key" className="sr-only">API Key</label>
-              <input id="API-Key" name="API Key" type="text" required className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="API Key" value={apiKey} onChange={e => setApiKey(e.target.value)} />
-            </div>
-            <div>
-              <label htmlFor="Upload-PDF" className="sr-only">Upload PDF</label>
-              <input id="Upload-PDF" name="Upload PDF" type="file" required className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Upload PDF" onChange={handleFileChange} />
-            </div>
-            <div>
-              <label htmlFor="Model-Choice" className="sr-only">Model Choice</label>
-              <select id="Model-Choice" name="Model Choice" required className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" value={modelChoice} onChange={e => setModelChoice(e.target.value)}>
+      <form className="mt-8 space-y-2" onSubmit={handleSubmit(handleApi)}>
+        {
+          errorMessage
+            ? <p className="mb-4 font-mono text-center text-black-500 bg-red-500 rounded border">{errorMessage}</p>
+            : message
+              ? <p className="mb-4 text-center font-mono text-green-300 animate-bounce ">{message}</p>
+              : <h1 className='text-center'>Fill in the fields</h1>
+        }
+        <React.Fragment className="rounded-md shadow-sm space-y-2 ">
+          {errors.apiKey && <p className='bg-red-400 text-center'>{errors.apiKey.message}</p>}
+          <input
+            id="API-Key"
+            name="apiKey"
+            type="text"
+            className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+            {...register('apiKey', {
+              required: true,
+              minLength: {
+                value: 32,  // replace 32 with the actual minimum length requirement
+                message: "API key must be at least 32 characters" // replace 32 with the actual minimum length requirement
+              }
+            })}
+            placeholder="API Key"
+          />
+
+          {errors.file && <p className='text-red-400 text-center'>{errors.file.message}</p>}
+          <input
+            id="Upload-PDF"
+            name="file"
+            type="file"
+            // accept="application/pdf"
+            className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+            {...register("file", {
+              validate: value => value[0]?.type === "application/pdf" || "Please upload a PDF file"
+            })}
+          />
+
+          {errors.modelChoice && <p className='text-red-400 text-center'>{errors.modelChoice.message}</p>}
+          {/* <label htmlFor="Model-Choice" className="sr-only">Model Choice</label> */}
+          <Controller
+            name="modelChoice"
+            control={control}
+            defaultValue=""
+            rules={{ required: 'This field is required' }}
+            render={({ field, fieldState }) => (
+              <select
+                {...field}
+                id="Model-Choice"
+                required
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              >
                 <option value="">--Please choose an option--</option>
                 <option value="gpt-3">GPT-3</option>
                 <option value="gpt-4">GPT-4</option>
-                {/* Add other options as needed */}
               </select>
-            </div>
-          </div>
-          <div>
-            <button type="submit" className="transition ease-in-out delay-150 group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-700 duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 drop-shadow-lg">
+            )}
+          />
+
+          <div className="flex flex-col items-center">
+            <button type="submit" className="transition ease-in-out delay-150 group relative w-1/2 py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-700 duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 drop-shadow-lg">
               {loading && (
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -94,10 +108,11 @@ const APIFormComponent = () => {
               )}
               Submit
             </button>
+          </div >
+        </React.Fragment>
 
-          </div>
-        </form>
-      </div>
+
+      </form>
     </div>
   );
 

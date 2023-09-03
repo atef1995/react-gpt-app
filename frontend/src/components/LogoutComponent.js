@@ -1,5 +1,4 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import api from '../api';
 import AuthContext from '../authContext';
 
@@ -27,7 +26,7 @@ const LogoutComponent = () => {
 
     return (
         <div>
-            {<p className='text-center'>{message}</p>}
+            {<p className='text-center bg-green'>{message}</p>}
         </div>
     );
 }
