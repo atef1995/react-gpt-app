@@ -14,6 +14,7 @@ from core.security import (
     create_password_reset_token,
     verify_password_reset_token,
     verify_token,
+    get_current_user,
 )
 
 from core.utils import get_current_session
@@ -97,7 +98,14 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     # if "@" in form_data.username:
-    user = db.query(UserData).filter(UserData.username == form_data.username).first()
+    user = (
+        db.query(UserData)
+        .filter(
+            (UserData.username == form_data.username)
+            | (UserData.email == form_data.username)
+        )
+        .first()
+    )
 
     if not user:
         logger.warning(
@@ -260,3 +268,26 @@ def reset_password(
     db.commit()
 
     return {"message": "Password reset successfully"}
+
+
+@router.put("/update")
+async def updateUser(
+    db: Session = Depends(get_db),
+    current_user: UserData = Depends(get_current_user),
+    username: str = None,
+    email: str = None,
+    password: str = None,
+    api_key: str = None,
+):
+    if username:
+        current_user.username = username
+    if email:
+        current_user.email = email
+    if password:
+        current_user.hashed_password = get_password_hash(password)
+    if api_key:
+        current_user.api_key = api_key  # Consider regenerating the API key securely
+
+    db.commit()
+
+    return {"detail": "Account updated successfully"}

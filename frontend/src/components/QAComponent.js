@@ -22,9 +22,9 @@ function QAComponent() {
             const response = await api.post('/ask/', { question });
             if (response.status === 200) {
                 const newConversationEntry = { question: question, answer: response.data.response };
-                console.log(response.data); // Make sure this is the data structure you expect
                 setConversation(prevConversation => [...prevConversation, newConversationEntry]);
                 setValue('question', '');  // This will clear the form input
+
             }
         } catch (error) {
             console.error('An error occurred:', error);
@@ -32,6 +32,7 @@ function QAComponent() {
             setConversation([...conversation, { question, answer: errorMessage, isError: true }]);
         } finally {
             setLoading(false);
+            scrollToBottom();
         }
     }
 
