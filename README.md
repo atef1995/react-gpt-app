@@ -62,13 +62,6 @@ This is a full-stack application that allows users to chat with OpenAI's GPT mod
     pip install -r requirements.txt
     ```
 
-    Create a `.env` file to store your environment variables, like the database URL and OpenAI API Key.
-
-    ```env
-    DATABASE_URL=...
-    OPENAI_API_KEY=...
-    ```
-
     Run the backend server.
 
     ```bash
