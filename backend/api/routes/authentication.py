@@ -16,7 +16,7 @@ from core.security import (
     verify_token,
     get_current_user,
 )
-
+from typing import Optional
 from core.utils import get_current_session
 from core.database import or_, Session, get_db
 from core.logger import logger
@@ -24,12 +24,14 @@ from core.email_util import send_email
 from models.user import UserData
 from pydantic import BaseModel
 from redis import asyncio as aioredis
+import os
 
 
 class RegisterPayload(BaseModel):
     username: str
     email: str
     password: str
+    apikey: Optional[str] = None
 
 
 router = APIRouter()
@@ -38,7 +40,13 @@ router = APIRouter()
 @router.on_event("startup")
 async def startup():
     # Configure it to use Redis. You can also configure it to use in-memory storage.
-    redis = await aioredis.from_url("redis://redis:6379")
+    redis_host = os.environ.get(
+        "REDIS_HOST", "localhost"
+    )  # Default to localhost if not set
+    redis_port = os.environ.get("REDIS_PORT", 6379)  # Default to 6379 if not set
+    redis_url = f"redis://{redis_host}:{redis_port}"
+
+    redis = await aioredis.from_url(redis_url)
     await FastAPILimiter.init(redis=redis, prefix="limiter")
 
 
@@ -63,7 +71,7 @@ def register(payload: RegisterPayload, db: Session = Depends(get_db)):
     new_user = UserData(
         username=payload.username, email=payload.email, hashed_password=hashed_password
     )
-    verification_link = f"https://http://localhost:3000/verify/{verification_token}"
+    verification_link = f"http://localhost:3000/verify/{verification_token}"
     db.add(new_user)
     db.commit()
     send_email(
@@ -82,6 +90,9 @@ def verify(token: str, db: Session = Depends(get_db)):
     user = db.query(UserData).filter(UserData.email == email).first()
     if not user:
         raise HTTPException(status_code=400, detail="User not found.")
+    if user.is_verified is True:
+        raise HTTPException(status_code=400, detail="User is verified.")
+
     try:
         user.is_verified = True
         db.commit()
@@ -208,7 +219,7 @@ async def logout(
     request: Request,
     _=Depends(RateLimiter(times=5, minutes=1)),
 ):
-    verify_access_token(request=request)
+    await verify_access_token(request=request)
     # Invalidate the refresh token for the user.
     response.delete_cookie("refresh_token")
     response.delete_cookie("access_token")
@@ -272,22 +283,64 @@ def reset_password(
 
 @router.put("/update")
 async def updateUser(
+    register_payload: RegisterPayload,
     db: Session = Depends(get_db),
     current_user: UserData = Depends(get_current_user),
-    username: str = None,
-    email: str = None,
-    password: str = None,
-    api_key: str = None,
 ):
-    if username:
-        current_user.username = username
-    if email:
-        current_user.email = email
-    if password:
-        current_user.hashed_password = get_password_hash(password)
-    if api_key:
-        current_user.api_key = api_key  # Consider regenerating the API key securely
+    if register_payload.username:
+        # Check if the new username already exists
+        existing_user = (
+            db.query(UserData)
+            .filter(
+                UserData.username == register_payload.username,
+                UserData.id != current_user.id,
+            )
+            .first()
+        )
+        if existing_user:
+            return {"detail": "Username already exists"}
+        current_user.username = register_payload.username
 
+    if register_payload.email:
+        # Check if the new email already exists
+        existing_user = (
+            db.query(UserData)
+            .filter(
+                UserData.email == register_payload.email, UserData.id != current_user.id
+            )
+            .first()
+        )
+        if existing_user:
+            return {"detail": "Email already exists"}
+        current_user.email = register_payload.email
+
+    if register_payload.password:
+        current_user.hashed_password = get_password_hash(register_payload.password)
+
+    if register_payload.apikey:
+        current_user.api_key = (
+            register_payload.apikey
+        )  # Consider regenerating the API key securely
+
+    # elif existing_user:
+    #     raise HTTPException(status_code=400, detail="Username already exists.")
     db.commit()
-
     return {"detail": "Account updated successfully"}
+
+
+@router.get("/current-user-details")
+async def get_current_user_details(
+    current_user: UserData = Depends(get_current_user), db: Session = Depends(get_db)
+):
+    # This assumes `get_current_user` function authenticates the user and returns their data
+
+    user = db.query(UserData).filter(UserData.id == current_user.id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "username": user.username,
+        "email": user.email,
+        # Include any other fields you want to return
+        "apikey": user.api_key,
+    }

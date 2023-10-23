@@ -4,7 +4,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
     volumes: # <-- Add this
@@ -23,6 +22,9 @@ services:
     # network_mode: "host"
     volumes: # <-- Add this
       - ./backend:/app # Maps your host machine's backend code to /app in the container
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
 
   redis:
     image: redis:latest

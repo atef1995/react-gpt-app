@@ -11,6 +11,7 @@ import LogoutComponent from './components/LogoutComponent';
 import AuthContext from './authContext';
 import ProtectedRoute from './ProtectedRoute';
 import Verification from './components/Verification';
+import UserSettings from './components/UserSettings';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,6 +40,7 @@ function App() {
           <Route path='/verify-reset-token' element={<ResetPasswordPage />} />
           <Route path='/verify/:token' element={<Verification />} />
           <Route path="*" element={<div>Page Not Found</div>} />
+          <Route path='/update' element={<UserSettings />} />
           <Route path="/logout" element={<LogoutComponent />} />
         </Routes>
       </AuthContext.Provider>

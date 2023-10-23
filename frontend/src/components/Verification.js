@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "../api";
+import LoginComponent from "./LoginComponent";
 
 const Verification = () => {
     const [loading, setLoading] = useState(true);
@@ -12,16 +13,13 @@ const Verification = () => {
         api.get(`/verify/${token}`)
             .then(response => {
                 // Handle success
-                console.log(`response: ${response.data}`);
-                setLoading(false);
                 setSuccess(true);
             })
             .catch(error => {
                 // Handle error
                 console.log(error);
-                setLoading(false);
-                setErrorMessage('Error verifying email. Please try again or contact support.');
-            });
+                setErrorMessage(error.response.data.detail);
+            }).finally(() => { setLoading(false); });
     }, [token]);
 
     if (loading) {
@@ -29,12 +27,12 @@ const Verification = () => {
     }
 
     if (success) {
-        return <div>Email successfully verified! You can now log in.</div>;
+        return <div className="p-5 text-center">Email successfully verified! You can now <Link to={'/login'} className="text-blue-500 hover:text-blue-300">log in.</Link></div>;
     }
 
     return (
         <div>
-            {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
+            {errorMessage && <div className="p-5 text-red-500 text-center">{errorMessage}</div>}
         </div>
     );
 }

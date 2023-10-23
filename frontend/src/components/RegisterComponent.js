@@ -44,7 +44,7 @@ function RegisterComponent() {
                         errorMessage
                             ? <p className="mb-4 font-mono text-center text-black-500 bg-red-500 rounded border ">{errorMessage}</p>
                             : message
-                                ? <p className="mb-4 text-center font-mono text-green-300 bg-green-700 rounded border animate-bounce ">{message}<a href="/login" className="text-blue-700 hover:text-blue-400">{"Login here."}</a></p>
+                                ? <p className="mb-4 text-center font-mono text-green-300 bg-green-700 rounded border animate-bounce ">{message}<a href="/login" className="text-blue-700 hover:text-blue-400">{"An email with a verification link was sent to you"}</a></p>
                                 : null
                     }
                     <div>

@@ -7,12 +7,12 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from models.crud import get_user
 from models.user import UserData
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from core.logger import logger
 
 
 s = URLSafeTimedSerializer(Config.SECRET_KEY)
-SECRET_KEY = Config.api_secret_key
+API_SECRET_KEY = Config.API_SECRET_KEY
 
 
 def get_token_from_cookie(request: Request):
@@ -54,13 +54,13 @@ def get_user_api_key(
     try:
         print("Inside get_user_api_key, DB type: ", type(db))
         payload = s.loads(token)
-        # print("Payload:", payload)
+
         user_id = payload["user_id"]
-        # print("User ID:", user_id)
+
         user = get_user(db, user_id=user_id)
-        # print("User:", user)
+
         # Retrieve encrypted API key and decrypt it
-        cipher_suite = Fernet(SECRET_KEY)
+        cipher_suite = Fernet(API_SECRET_KEY.encode())
         if user.api_key:
             print("Encrypted API key before decryption: ", user.api_key)
             retrieved_encrypted_api_key_bytes = user.api_key.encode("utf-8")
@@ -76,6 +76,8 @@ def get_user_api_key(
         print("Token type:", type(token))
         print("DB session type:", type(db))
         raise HTTPException(status_code=400, detail="Invalid or expired api_key")
+    except InvalidToken as t:
+        print("Invalid Token", t)
 
 
 def create_email_verification_token(email: str):

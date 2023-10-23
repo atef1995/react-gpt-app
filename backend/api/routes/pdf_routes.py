@@ -6,7 +6,7 @@ from core.database import Session, get_db
 from core.security import (
     get_current_user,
     get_user_api_key,
-    SECRET_KEY,
+    API_SECRET_KEY,
 )
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Body
 from services import pdf_service
@@ -31,7 +31,7 @@ async def set_api_key(
     current_user: UserData = Depends(get_current_user),
 ):
     # Encrypt the API key
-    cipher_suite = Fernet(SECRET_KEY)
+    cipher_suite = Fernet(API_SECRET_KEY.encode())
     encrypted_api_key_bytes = cipher_suite.encrypt(api_key.encode())
 
     # Decode it as UTF-8 to store as a string in the database

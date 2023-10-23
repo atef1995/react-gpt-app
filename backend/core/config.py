@@ -1,11 +1,12 @@
 from cryptography.fernet import Fernet
+import os
 
 
 class Config:
     SECRET_KEY = "your_secret_key"
     EXPIRE_MINUTES = 60
     DATABASE_URL = "sqlite:///./app.db"
-    api_secret_key = Fernet.generate_key()
+    API_SECRET_KEY = os.environ.get("API_SECRET_KEY", Fernet.generate_key().decode())
 
 
 class EmailConfig:

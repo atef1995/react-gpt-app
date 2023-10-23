@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useForm, Controller } from 'react-hook-form';
@@ -9,24 +9,40 @@ const APIFormComponent = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const [hasApiKey, setHasApiKey] = useState(false);
 
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await api.get('http://localhost:8000/current-user-details');
+        if (response.data.apikey) {
+          setHasApiKey(true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user details:', error);
+      }
+    };
 
-  const handleApi = (data) => {
+    fetchUserDetails();
+  }, []);
+
+  const handleApi = async (data) => {
     const { apiKey, file, modelChoice } = data;
     setLoading(true); // start loading
     const formData = new FormData();
     formData.append('file', file[0]);
     formData.append('model_choice', modelChoice);
+    if (!hasApiKey) {
+      await api.post(`/set-api-key/?api_key=${apiKey}`, apiKey)
+        .then((response) => {
+          setMessage("Success api");
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+        })
+    }
 
-    api.post('/set-api-key/?api_key=${apiKey}', apiKey)
-      .then((response) => {
-        setMessage("Success api");
-      })
-      .catch((error) => {
-        setErrorMessage(error.message);
-      })
-
-    api.post('upload/', formData)
+    await api.post('upload/', formData)
       .then(response => {
         setMessage("Success!");
         navigate('/ask');
@@ -48,23 +64,26 @@ const APIFormComponent = () => {
               ? <p className="mb-4 text-center font-mono text-green-300 animate-bounce ">{message}</p>
               : <h1 className='text-center'>Fill in the fields</h1>
         }
-        <React.Fragment className="rounded-md shadow-sm space-y-2 ">
-          {errors.apiKey && <p className='bg-red-400 text-center'>{errors.apiKey.message}</p>}
-          <input
-            id="API-Key"
-            name="apiKey"
-            type="text"
-            className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            {...register('apiKey', {
-              required: true,
-              minLength: {
-                value: 32,  // replace 32 with the actual minimum length requirement
-                message: "API key must be at least 32 characters" // replace 32 with the actual minimum length requirement
-              }
-            })}
-            placeholder="API Key"
-          />
-
+        <React.Fragment>
+          {!hasApiKey && (
+            <>
+              {errors.apiKey && <p className='bg-red-400 text-center'>{errors.apiKey.message}</p>}
+              <input
+                id="API-Key"
+                name="apiKey"
+                type="password"
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                {...register('apiKey', {
+                  required: true,
+                  minLength: {
+                    value: 32,  // replace 32 with the actual minimum length requirement
+                    message: "API key must be at least 32 characters" // replace 32 with the actual minimum length requirement
+                  }
+                })}
+                placeholder="API Key"
+              />
+            </>
+          )}
           {errors.file && <p className='text-red-400 text-center'>{errors.file.message}</p>}
           <input
             id="Upload-PDF"
