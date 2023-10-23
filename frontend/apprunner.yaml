@@ -1,8 +1,0 @@
-version: 1.0
-runtime: nodejs12
-build:
-  commands:
-    - npm install
-    - npm run build
-start:
-  command: npm start
