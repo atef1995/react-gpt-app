@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import ResetPassword from "./ResetPassword";
-import axios from "axios";
+import api from "../api";
 
 const ResetPasswordPage = () => {
     const location = useLocation();
@@ -12,7 +12,7 @@ const ResetPasswordPage = () => {
     console.log("Token from useParams:", token);
 
     useEffect(() => {
-        axios.get(`http://127.0.0.1:8000/verify-reset-token?token=${token}`)
+        api.get(`verify-reset-token?token=${token}`)
             .then(response => {
                 setIsValidToken(true);
             })

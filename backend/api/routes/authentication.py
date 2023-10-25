@@ -163,9 +163,9 @@ def login(
             key="access_token",
             value=access_token,
             httponly=True,
-            domain="localhost",
+            domain="18.159.235.178",
             path="/",
-            max_age=900,  # 15 minutes in seconds
+            max_age=1900,  # 15 minutes in seconds
         )
 
         return {
@@ -191,7 +191,8 @@ async def verify_access_token(request: Request):
         raise HTTPException(status_code=401, detail="Token not found")
 
     try:
-        user_id = verify_token(access_token), verify_token(refresh_token)
+        user_id = verify_token(access_token)
+        # , verify_token(refresh_token)
 
         logger.info(f"Token verified {user_id}")
         return {"status": "Token verified"}

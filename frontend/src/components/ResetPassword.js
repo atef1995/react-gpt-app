@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api";
 
 function ResetPassword({ token }) {
     const [newPassword, setNewPassword] = useState("");
@@ -13,7 +13,7 @@ function ResetPassword({ token }) {
             new_password: newPassword,
         };
 
-        axios.post("http://127.0.0.1:8000/reset-password/", requestData)
+        api.post("reset-password/", requestData)
             .then(response => {
                 setSuccess(true);
                 setMessage("Password reset successful. You can now log in with your new password.");
