@@ -1,9 +1,9 @@
-name: CI/CD Pipeline
+name: ECS CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main # Trigger the workflow on push to the main branch
+      - main
 
 jobs:
   build-and-deploy:
@@ -22,32 +22,17 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        env:
-          AWS_REGION: eu-central-1
         run: |
-          echo "Logging in to Amazon ECR..."
-          echo $(aws ecr get-login-password --region $AWS_REGION) | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+          echo $(aws ecr get-login-password --region eu-central-1) | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
 
+      # Build and Push Docker images (uncomment if necessary)
       # - name: Build and Push Docker image
       #   run: |
-      #     docker build -t my-frontend ./frontend # Path to your frontend Dockerfile
-      #     docker tag my-frontend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
-      #     docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+      #     docker build -t my-frontend ./frontend
+      #     docker tag my-frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+      #     docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
 
-      #     docker build -t my-backend ./backend # Path to your backend Dockerfile
-      #     docker tag my-backend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
-      #     docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
-
-      - name: Setup known_hosts
+      - name: Deploy to ECS
         run: |
-          mkdir -p ~/.ssh
-          echo "$SERVER_HOST_KEY" >> ~/.ssh/known_hosts
-        env:
-          SERVER_HOST_KEY: ${{ secrets.SERVER_HOST_KEY }}
-
-      - name: Setup known_hosts
-        run: echo "$SERVER_HOST_KEY" >> ~/.ssh/known_hosts
-
-      - name: Deploy to EC2
-        run: |
-          ssh -i "reactApp.pem" ec2-user@ec2-18-159-235-178.eu-central-1.compute.amazonaws.com "docker pull 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest; docker pull 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest; docker-compose down; docker-compose up -d"
+          ecs-cli configure --cluster cluster_1 --region eu-central-1
+          ecs-cli compose --file docker-compose.yml up
