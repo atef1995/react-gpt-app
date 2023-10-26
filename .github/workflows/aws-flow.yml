@@ -10,26 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
 
-    - name: Build and Push Docker image
-      run: |
-        docker build -t my-frontend ./frontend # Path to your frontend Dockerfile
-        docker tag my-frontend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
-        docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+      - name: Login to Amazon ECR
+        id: login-ecr
+        env:
+          AWS_REGION: eu-central-1
+        run: |
+          echo "Logging in to Amazon ECR..."
+          echo $(aws ecr get-login-password --region $AWS_REGION) | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
 
-        docker build -t my-backend ./backend # Path to your backend Dockerfile
-        docker tag my-backend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
-        docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
+      - name: Build and Push Docker image
+        run: |
+          docker build -t my-frontend ./frontend # Path to your frontend Dockerfile
+          docker tag my-frontend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+          docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
 
-    - name: Deploy to EC2
-      run: |
-        ssh -i "reactApp.pem" ec2-user@ec2-18-159-235-178.eu-central-1.compute.amazonaws.com "docker pull 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest; docker pull 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest; docker-compose down; docker-compose up -d"
+          docker build -t my-backend ./backend # Path to your backend Dockerfile
+          docker tag my-backend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
+          docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i "reactApp.pem" ec2-user@ec2-18-159-235-178.eu-central-1.compute.amazonaws.com "docker pull 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest; docker pull 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest; docker-compose down; docker-compose up -d"
