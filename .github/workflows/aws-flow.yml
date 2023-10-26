@@ -38,10 +38,12 @@ jobs:
       #     docker tag my-backend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
       #     docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
 
-      - name: Setup SSH key
+      - name: Setup known_hosts
         run: |
-          echo "${{ secrets.REACT_APP_PEM }}" > reactApp.pem
-          chmod 600 reactApp.pem
+          mkdir -p ~/.ssh
+          echo "$SERVER_HOST_KEY" >> ~/.ssh/known_hosts
+        env:
+          SERVER_HOST_KEY: ${{ secrets.SERVER_HOST_KEY }}
 
       - name: Setup known_hosts
         run: echo "$SERVER_HOST_KEY" >> ~/.ssh/known_hosts
