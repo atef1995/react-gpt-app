@@ -28,15 +28,15 @@ jobs:
           echo "Logging in to Amazon ECR..."
           echo $(aws ecr get-login-password --region $AWS_REGION) | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
 
-      - name: Build and Push Docker image
-        run: |
-          docker build -t my-frontend ./frontend # Path to your frontend Dockerfile
-          docker tag my-frontend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
-          docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+      # - name: Build and Push Docker image
+      #   run: |
+      #     docker build -t my-frontend ./frontend # Path to your frontend Dockerfile
+      #     docker tag my-frontend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+      #     docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
 
-          docker build -t my-backend ./backend # Path to your backend Dockerfile
-          docker tag my-backend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
-          docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
+      #     docker build -t my-backend ./backend # Path to your backend Dockerfile
+      #     docker tag my-backend:latest 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
+      #     docker push 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
 
       - name: Setup SSH key
         run: |
