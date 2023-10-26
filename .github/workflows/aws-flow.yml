@@ -16,8 +16,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: AKIAUQBL2PFWOHCV6QA4
+          aws-secret-access-key: 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
           aws-region: eu-central-1
 
       - name: Install ECS CLI
@@ -28,7 +28,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         run: |
-          echo $(aws ecr get-login-password --region eu-central-1) | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
+          echo $(aws ecr get-login-password --region eu-central-1) | docker login --username AWS --password-stdin 309329557868.dkr.ecr.eu-central-1.amazonaws.com
 
       # Build and Push Docker images (uncomment if necessary)
       # - name: Build and Push Docker image
