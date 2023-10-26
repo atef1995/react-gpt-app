@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main # Trigger the workflow on push to the main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ 309329557868 }}
+        aws-secret-access-key: ${{ AKIAUQBL2PFWOHCV6QA4  }}
+        aws-region: eu-center-1 # Update this to your AWS region
+
+    - name: Build and Push Docker image
+      run: |
+        docker build -t.
+        docker tag your-image-name:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-repo-name:latest
+        $(aws ecr get-login --no-include-email --region ${{ secrets.AWS_REGION }})
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-repo-name:latest
+
+    - name: Deploy to EC2
+      run: |
+        ssh -i "reactApp.pem" ec2-user@ec2-18-159-235-178.eu-central-1.compute.amazonaws.com "docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-repo-name:latest && docker-compose down && docker-compose up -d"
