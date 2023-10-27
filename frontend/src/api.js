@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://3.72.88.92:8000/',
+    baseURL: 'http://backendBalancer-614402920.eu-central-1.elb.amazonaws.com/',
     withCredentials: true
 });
 
