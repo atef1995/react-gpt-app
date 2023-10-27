@@ -33,10 +33,12 @@ jobs:
       #Build and Push Docker images (uncomment if necessary)
       - name: Build and Push Docker image
         run: |
-          docker-compose build -t
-        # docker build -t my-frontend ./frontend
-        # docker tag my-frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
-        # docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+          docker build -t my-frontend ./frontend
+          docker tag my-frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+          docker build -t my-backend ./backend
+          docker tag my-backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
 
       - name: Force New Deployment on ECS Service
         run: |
