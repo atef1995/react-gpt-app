@@ -37,6 +37,11 @@ class RegisterPayload(BaseModel):
 router = APIRouter()
 
 
+@router.get("/")
+def read_root():
+    return {"message": "Hello, world!"}
+
+
 @router.on_event("startup")
 async def startup():
     # Configure it to use Redis. You can also configure it to use in-memory storage.
