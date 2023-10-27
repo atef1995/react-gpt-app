@@ -43,4 +43,4 @@ jobs:
       - name: Force New Deployment on ECS Service
         run: |
           aws ecs update-service --cluster cluster_1 --service frontend --force-new-deployment
-          aws ecs update-service --cluster cluster_1 --service backend_service --force-new-deployment
+          aws ecs update-service --cluster cluster_1 --service backend2 --force-new-deployment
