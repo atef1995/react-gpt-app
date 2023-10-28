@@ -26,6 +26,7 @@ def get_token_from_cookie(request: Request):
     except Exception as e:
         logger.error("An error occurred: function: get_token_from_cookie", exc_info=1)
         logger.info("Token type:", type(token))
+        logger.info("Cookies: ", request.cookies)
 
 
 def get_current_user(

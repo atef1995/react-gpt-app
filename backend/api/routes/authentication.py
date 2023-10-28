@@ -171,6 +171,7 @@ def login(
             domain="frontendl-463996173.eu-central-1.elb.amazonaws.com",
             path="/",
             max_age=1900,  # 15 minutes in seconds
+            samesite="lax",
         )
 
         return {
