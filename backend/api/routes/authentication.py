@@ -168,7 +168,8 @@ def login(
         response.set_cookie(
             key="access_token",
             value=access_token,
-            httponly=is_secure,
+            httponly=True,
+            secure=True,
             path="/",
             max_age=1900,  # 15 minutes in seconds
             samesite="None",
