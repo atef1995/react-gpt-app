@@ -15,6 +15,7 @@ export default function UserSettings() {
         // Fetch the current user details
         api.get('/current-user-details')
             .then(response => {
+                console.log(response)
                 // Assuming response.data contains the current user's details
                 const { username, email, apikey } = response.data;
                 setValue("username", username);

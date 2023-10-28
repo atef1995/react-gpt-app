@@ -163,6 +163,7 @@ def login(
         #     domain="localhost",
         #     path="/",
         # )
+        response.set_cookie(key="test_cookie", value="test_value")
 
         response.set_cookie(
             key="access_token",
