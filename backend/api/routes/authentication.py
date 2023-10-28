@@ -156,24 +156,23 @@ def login(
             False  # or False if you're in a development environment without HTTPS
         )
 
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=is_secure,
-            domain="localhost",
-            path="/",
-        )
+        # response.set_cookie(
+        #     key="refresh_token",
+        #     value=refresh_token,
+        #     httponly=is_secure,
+        #     domain="localhost",
+        #     path="/",
+        # )
 
         response.set_cookie(
             key="access_token",
             value=access_token,
             httponly=is_secure,
-            domain="frontendl-463996173.eu-central-1.elb.amazonaws.com",
             path="/",
             max_age=1900,  # 15 minutes in seconds
             samesite="None",
         )
-
+        print("login response", response)
         return {
             # "access_token": access_token,
             "message": "Login successful",

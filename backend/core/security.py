@@ -17,6 +17,7 @@ API_SECRET_KEY = Config.API_SECRET_KEY
 
 def get_token_from_cookie(request: Request):
     try:
+        print(request)
         token = request.cookies.get("access_token")
         if not token:
             raise HTTPException(
