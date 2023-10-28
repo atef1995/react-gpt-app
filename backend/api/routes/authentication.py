@@ -168,7 +168,7 @@ def login(
             key="access_token",
             value=access_token,
             httponly=True,
-            domain="18.159.235.178",
+            domain="frontendl-463996173.eu-central-1.elb.amazonaws.com",
             path="/",
             max_age=1900,  # 15 minutes in seconds
         )
