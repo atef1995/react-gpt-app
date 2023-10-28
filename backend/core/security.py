@@ -37,7 +37,7 @@ def get_current_user(
         payload = s.loads(token)
         user_id = payload["user_id"]
         user = get_user(db, user_id=user_id)
-        # print(f"User object: {user}")  # Debug print
+        print(f"User object: {user}")  # Debug print
         if user is None:
             raise HTTPException(status_code=400, detail="User not found")
         return user
