@@ -13,19 +13,21 @@ export default function UserSettings() {
 
     useEffect(() => {
         // Fetch the current user details
-        api.get('/current-user-details')
-            .then(response => {
-                console.log(response)
-                // Assuming response.data contains the current user's details
-                const { username, email, apikey } = response.data;
-                setValue("username", username);
-                setValue("email", email);
-                setValue("apikey", apikey);
-            })
-            .catch(error => {
-                console.error("Error fetching user details:", error);
-            });
-    }, []);
+        if (isLoggedIn) {
+            api.get('/current-user-details')
+                .then(response => {
+                    console.log(response)
+                    // Assuming response.data contains the current user's details
+                    const { username, email, apikey } = response.data;
+                    setValue("username", username);
+                    setValue("email", email);
+                    setValue("apikey", apikey);
+                })
+                .catch(error => {
+                    console.error("Error fetching user details:", error);
+                });
+        }
+    }, [isLoggedIn]);
 
     const handleRegister = (data) => {
         const { username, email, password, apikey } = data;

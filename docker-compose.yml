@@ -2,11 +2,15 @@ version: "3"
 
 services:
   frontend:
-    image: 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+    build:
+      context: ./frontend
+    # image: 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
     ports:
       - "80:80"
 
   backend:
+    build:
+      context: ./backend
     image: 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
     ports:
       - "8000:8000"
@@ -29,4 +33,3 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - "backend"
-

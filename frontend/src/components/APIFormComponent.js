@@ -30,7 +30,9 @@ const APIFormComponent = () => {
     const { apiKey, file, modelChoice } = data;
     setLoading(true); // start loading
     const formData = new FormData();
-    formData.append('file', file[0]);
+    if (file && file[0]) {
+      formData.append('file', file[0]);
+    }
     formData.append('model_choice', modelChoice);
     if (!hasApiKey) {
       await api.post(`/set-api-key/?api_key=${apiKey}`, apiKey)
@@ -92,7 +94,7 @@ const APIFormComponent = () => {
             // accept="application/pdf"
             className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             {...register("file", {
-              validate: value => value[0]?.type === "application/pdf" || "Please upload a PDF file"
+              validate: value => !value[0] || value[0]?.type === "application/pdf" || "Please upload a PDF file"
             })}
           />
 

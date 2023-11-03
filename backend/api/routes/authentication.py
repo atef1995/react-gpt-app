@@ -14,10 +14,9 @@ from core.security import (
     create_password_reset_token,
     verify_password_reset_token,
     verify_token,
-    get_current_user,
 )
 from typing import Optional
-from core.utils import get_current_session
+from core.utils import get_current_session, get_current_user, create_session
 from core.database import or_, Session, get_db
 from core.logger import logger
 from core.email_util import send_email
@@ -77,13 +76,13 @@ def register(payload: RegisterPayload, db: Session = Depends(get_db)):
         username=payload.username, email=payload.email, hashed_password=hashed_password
     )
     verification_link = f"http://localhost:3000/verify/{verification_token}"
-    db.add(new_user)
-    db.commit()
     send_email(
         "Verify your email address",
         f"Click here to verify your email address: {verification_link}",
         payload.email,
     )
+    db.add(new_user)
+    db.commit()
     return {"message": "User created"}
 
 
@@ -163,17 +162,21 @@ def login(
         #     domain="localhost",
         #     path="/",
         # )
-        response.set_cookie(key="test_cookie", value="test_value")
+
+        # response.set_cookie(key="test_cookie", value="test_value")
 
         response.set_cookie(
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=True,
+            secure=False,  # Set to True in production
             path="/",
-            max_age=1900,  # 15 minutes in seconds
-            samesite="None",
+            max_age=1900,
+            samesite="lax",  # Set to None in production
         )
+
+        expires_in = timedelta(minutes=15)
+        create_session(user_id=user.id, expires_in=expires_in)
         print("login response", response)
         return {
             # "access_token": access_token,
@@ -191,9 +194,9 @@ def login(
 
 @router.get("/verify-access-token/")
 async def verify_access_token(request: Request):
-    refresh_token = request.cookies.get("refresh_token")
+    # refresh_token = request.cookies.get("refresh_token")
     access_token = request.cookies.get("access_token")
-    if not refresh_token and not access_token:
+    if not access_token:
         logger.error("Access token not found")
         raise HTTPException(status_code=401, detail="Token not found")
 
@@ -336,19 +339,40 @@ async def updateUser(
     return {"detail": "Account updated successfully"}
 
 
+@router.get("/test-current-session")
+async def test_current_session(current_session: dict = Depends(get_current_session)):
+    try:
+        user_id = current_session.get("user_id", None)
+        if user_id is None:
+            return {"error": "User ID not found in session data."}
+
+        return {"success": True, "user_id": user_id}
+    except HTTPException as e:
+        return {"error": e.detail}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @router.get("/current-user-details")
 async def get_current_user_details(
-    current_user: UserData = Depends(get_current_user), db: Session = Depends(get_db)
+    current_session: dict = Depends(get_current_session),  # <-- added this line
+    db: Session = Depends(get_db),
 ):
-    # This assumes `get_current_user` function authenticates the user and returns their data
+    print("Inside get_current_user_details")
+    print("Current Session:", current_session)  # <-- added this line
+    print("DB Session:", db)
 
-    user = db.query(UserData).filter(UserData.id == current_user.id).first()
+    # Assuming current_session contains an "id" field representing the user ID
+    user_id = current_session.get("user_id", None)
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    user = db.query(UserData).filter(UserData.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     return {
         "username": user.username,
         "email": user.email,
-        # Include any other fields you want to return
         "apikey": user.api_key,
     }

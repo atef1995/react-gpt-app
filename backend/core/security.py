@@ -9,77 +9,75 @@ from models.crud import get_user
 from models.user import UserData
 from cryptography.fernet import Fernet, InvalidToken
 from core.logger import logger
+from .utils import get_current_session
+from .common import s
 
-
-s = URLSafeTimedSerializer(Config.SECRET_KEY)
 API_SECRET_KEY = Config.API_SECRET_KEY
 
 
-def get_token_from_cookie(request: Request):
-    try:
-        print(request)
-        token = request.cookies.get("access_token")
-        if not token:
-            raise HTTPException(
-                status_code=401, detail="Authentication token is missing"
-            )
-        return token
-    except Exception as e:
-        logger.error("An error occurred: function: get_token_from_cookie", exc_info=1)
-        logger.info("Token type:", type(token))
-        logger.info("Cookies: ", request.cookies)
+# def get_token_from_cookie(request: Request):
+#     try:
+#         print(request)
+#         token = request.cookies.get("access_token")
+#         if not token:
+#             raise HTTPException(
+#                 status_code=401, detail="Authentication token is missing"
+#             )
+#         return token
+#     except Exception as e:
+#         logger.error("An error occurred: function: get_token_from_cookie", exc_info=1)
+#         logger.info("Token type:", type(token))
+#         logger.info("Cookies: ", request.cookies)
 
 
-def get_current_user(
-    token: str = Depends(get_token_from_cookie),
-    db: Session = Depends(get_db),
-) -> UserData:
-    try:
-        payload = s.loads(token)
-        user_id = payload["user_id"]
-        user = get_user(db, user_id=user_id)
-        print(f"User object: {user}")  # Debug print
-        if user is None:
-            raise HTTPException(status_code=400, detail="User not found")
-        return user
-    except (BadSignature, SignatureExpired, Exception) as e:
-        print("Error at get_current: ", e)
-        print("Token type:", type(token))
-        print("DB session type:", type(db))
-        raise HTTPException(status_code=400, detail="Invalid or expired token")
+# def get_current_user(
+#     token: str = Depends(get_token_from_cookie),
+#     db: Session = Depends(get_db),
+# ) -> UserData:
+#     try:
+#         payload = s.loads(token)
+#         user_id = payload["user_id"]
+#         user = get_user(db, user_id=user_id)
+#         print(f"User object: {user}")  # Debug print
+#         if user is None:
+#             raise HTTPException(status_code=400, detail="User not found")
+#         return user
+#     except (BadSignature, SignatureExpired, Exception) as e:
+#         print("Error at get_current: ", e)
+#         print("Token type:", type(token))
+#         print("DB session type:", type(db))
+#         raise HTTPException(status_code=400, detail="Invalid or expired token")
 
 
 def get_user_api_key(
     db: str = Depends(get_db),
-    token: str = Depends(get_token_from_cookie),
+    token_data: dict = Depends(
+        get_current_session
+    ),  # token_data because get_current_session returns the data
 ) -> str:
     try:
-        print("Inside get_user_api_key, DB type: ", type(db))
-        payload = s.loads(token)
-
-        user_id = payload["user_id"]
-
+        user_id = token_data.get("user_id", None)
+        # user_id = token_data["user_id"]
         user = get_user(db, user_id=user_id)
 
-        # Retrieve encrypted API key and decrypt it
-        cipher_suite = Fernet(API_SECRET_KEY.encode())
-        if user.api_key:
-            print("Encrypted API key before decryption: ", user.api_key)
-            retrieved_encrypted_api_key_bytes = user.api_key.encode("utf-8")
-            decrypted_api_key = cipher_suite.decrypt(
-                retrieved_encrypted_api_key_bytes, ttl=60 * 60 * 24 * 30
-            ).decode()
-            print("\ndecrypted encrypted API key:" + decrypted_api_key)
-            return decrypted_api_key
-        else:
+        if not user or not user.api_key:
             raise HTTPException(status_code=400, detail="No API key found for the user")
+
+        # Decrypt API key
+        cipher_suite = Fernet(API_SECRET_KEY.encode())
+        decrypted_api_key = cipher_suite.decrypt(
+            user.api_key.encode("utf-8"), ttl=60 * 60 * 24 * 30
+        ).decode()
+
+        return decrypted_api_key
+
+    except InvalidToken as t:  # Catch this before generic Exception
+        print("Invalid Token:", t)
+        raise HTTPException(status_code=400, detail="Invalid or expired API key")
+
     except Exception as e:
-        print("An error occurred get_user_api_key:", e, "type:", type(e))
-        print("Token type:", type(token))
-        print("DB session type:", type(db))
-        raise HTTPException(status_code=400, detail="Invalid or expired api_key")
-    except InvalidToken as t:
-        print("Invalid Token", t)
+        print("An error occurred in get_user_api_key:", e)
+        raise HTTPException(status_code=400, detail="An error occurred")
 
 
 def create_email_verification_token(email: str):

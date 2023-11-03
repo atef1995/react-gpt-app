@@ -1,5 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+// import { Markup } from "react-render-markup";
+import Markdown from 'react-markdown'
 
 function ConversationHistory({ conversation }) {
     return (
@@ -13,7 +15,9 @@ function ConversationHistory({ conversation }) {
                     </div>
                     {pair.isError ? (<p className="text-red bg-red-500 rounded p-1">{pair.answer}</p>) : (
                         <div className="py-3 bg-gray-100 w-full rounded shadow-md">
-                            <ReactMarkdown className="ml-2">{`A: ${pair.answer}`}</ReactMarkdown>
+                            {console.log(typeof (pair.answer))}
+                            <Markdown>{pair.answer}</Markdown>
+
                         </div>)}
 
                 </div>
