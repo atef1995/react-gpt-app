@@ -1,46 +1,46 @@
-name: ECS CI/CD Pipeline
+# name: ECS CI/CD Pipeline
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: eu-central-1
 
-      - name: Install ECS CLI
-        run: |
-          sudo curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
-          sudo chmod +x /usr/local/bin/ecs-cli
+#       - name: Install ECS CLI
+#         run: |
+#           sudo curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+#           sudo chmod +x /usr/local/bin/ecs-cli
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        run: |
-          echo $(aws ecr get-login-password --region eu-central-1) | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
+#       - name: Login to Amazon ECR
+#         id: login-ecr
+#         run: |
+#           echo $(aws ecr get-login-password --region eu-central-1) | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
 
-      #Build and Push Docker images (uncomment if necessary)
-      - name: Build and Push Docker image
-        run: |
-          docker build -t my-frontend ./frontend
-          docker tag my-frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
-          docker build -t my-backend ./backend
-          docker tag my-backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
+#       #Build and Push Docker images (uncomment if necessary)
+#       - name: Build and Push Docker image
+#         run: |
+#           docker build -t my-frontend ./frontend
+#           docker tag my-frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+#           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
+#           docker build -t my-backend ./backend
+#           docker tag my-backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
+#           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
 
-      - name: Force New Deployment on ECS Service
-        run: |
-          aws ecs update-service --cluster cluster_1 --service frontend --force-new-deployment
-          aws ecs update-service --cluster cluster_1 --service backend2 --force-new-deployment
+#       - name: Force New Deployment on ECS Service
+#         run: |
+#           aws ecs update-service --cluster cluster_1 --service frontend --force-new-deployment
+#           aws ecs update-service --cluster cluster_1 --service backend2 --force-new-deployment
