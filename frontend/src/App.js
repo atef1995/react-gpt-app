@@ -28,7 +28,6 @@ function App() {
   return (
     <BrowserRouter>
       <AuthContext.Provider value={{ isLoggedIn, logIn, logOut }}>
-        <NavBar />
         <Routes>
           <Route path="/" element={<HomeComponent />} />
           <Route path="/ask" element={<ProtectedRoute><QAComponent /></ProtectedRoute>} />

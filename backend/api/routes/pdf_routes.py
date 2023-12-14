@@ -15,6 +15,7 @@ from typing import Optional, List, Union
 from cryptography.fernet import Fernet
 from pydantic import BaseModel
 from core.logger import logger
+from services.prompts import expert_prompts, synonym_map
 
 
 class QuestionModel(BaseModel):
@@ -23,21 +24,6 @@ class QuestionModel(BaseModel):
 
 
 router = APIRouter()
-
-# List of expert-crafted prompts
-expert_prompts = {
-    "write": [
-        "Write a code using Python to solve a specific problem.",
-        "Write a JavaScript function for a front-end feature.",
-        "Write a SQL query to fetch data from a database.",
-    ],
-    "code": [
-        "Code a simple game using Python.",
-        "Code a REST API using Node.js.",
-        "Code a data analysis script using Python libraries like Pandas.",
-    ],
-    # Add more prompts here
-}
 
 
 @router.post("/set-api-key/")
@@ -103,6 +89,13 @@ async def get_suggestions(q: str = ""):
     for key in expert_prompts.keys():
         if key in query_words:
             suggestions.extend(expert_prompts[key])
+
+    for (
+        synonym,
+        primary_key,
+    ) in synonym_map.items():  # Use .items() to get both key and value
+        if synonym in query_words:
+            suggestions.extend(expert_prompts[primary_key])
 
     if not suggestions:
         return "No suggestions available."

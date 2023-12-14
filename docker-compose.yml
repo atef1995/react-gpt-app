@@ -4,14 +4,12 @@ services:
   frontend:
     build:
       context: ./frontend
-    # image: 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-frontend:latest
     ports:
       - "80:80"
 
   backend:
     build:
       context: ./backend
-    image: 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-backend:latest
     ports:
       - "8000:8000"
     depends_on:
@@ -26,7 +24,6 @@ services:
       - "6379:6379"
 
   filebeat:
-    image: 309329557868.dkr.ecr.eu-central-1.amazonaws.com/my-filebeat:latest
     command: filebeat -e
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro

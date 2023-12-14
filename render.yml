@@ -1,0 +1,27 @@
+# render.yml
+
+services:
+  - name: frontend
+    type: web
+    build_command: cd frontend && npm install && npm run build
+    start_command: cd frontend && npm start
+    health_check_path: /
+
+  - name: backend
+    type: web
+    build_command: cd backend && pip install -r requirements.txt
+    start_command: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    health_check_path: /health
+
+  - name: redis
+    type: web
+    image: redis:latest
+
+  - name: filebeat
+    type: web
+    start_command: filebeat -e
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - backend

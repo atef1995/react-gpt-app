@@ -14,13 +14,22 @@ export default function SuggestionsComponent({ query, onSuggestionClick }) {
     };
 
     const fetchSuggestions = async () => {
+        if (query.length === 0) {
+            setSuggestions([]);
+            return;
+        }
+
         try {
             const response = await api.get(`/get-suggestions?q=${query}`);
             console.log(response.data);
-            if (Array.isArray(response.data)) {
+            if (response.data === "No suggestions available.") {
+                setSuggestions([]);
+            }
+            else if (Array.isArray(response.data)) {
                 setSuggestions(response.data);
             } else {
                 setSuggestions([response.data]);
+                console.log(suggestions, suggestions.length);
             }
         }
         catch (error) {
@@ -37,10 +46,10 @@ export default function SuggestionsComponent({ query, onSuggestionClick }) {
     return (
         <div>
             {suggestions.length === 0 ? (
-                <div>no suggestions</div>
+                null
             ) : (
 
-                <ul className='p-3 space-y-1'>
+                <ul className='p-3 space-y-1 border-blue-300 placeholder-gray-500 text-gray-900 drop-shadow-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm'>
                     {suggestions.map((suggestion, index) => (
                         <li
                             key={index}

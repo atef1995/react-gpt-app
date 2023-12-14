@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useForm, Controller } from 'react-hook-form';
+import { Input } from "@material-tailwind/react";
 
 const APIFormComponent = () => {
   const { register, handleSubmit, watch, control, formState: { errors } } = useForm();
@@ -70,7 +71,7 @@ const APIFormComponent = () => {
           {!hasApiKey && (
             <>
               {errors.apiKey && <p className='bg-red-400 text-center'>{errors.apiKey.message}</p>}
-              <input
+              <Input
                 id="API-Key"
                 name="apiKey"
                 type="password"
