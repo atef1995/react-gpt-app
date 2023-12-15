@@ -4,6 +4,7 @@ services:
   - type: web
     runtime: docker
     name: frontend
+    plan: free
     dockerfilePath: frontend/Dockerfile
     buildCommand: cd frontend && npm install && npm run build
     envVars:
@@ -13,6 +14,7 @@ services:
   - type: web
     runtime: docker
     name: backend
+    plan: free
     dockerfilePath: backend/Dockerfile
     buildCommand: cd backend && pip install -r requirements.txt
     envVars:
@@ -24,6 +26,7 @@ services:
   - type: web
     runtime: docker
     name: redis
+    plan: free
     dockerfilePath: docker-compose.yml
     buildCommand: docker-compose build
     healthCheckPath: /
