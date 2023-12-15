@@ -26,7 +26,6 @@ services:
     name: redis
     dockerfilePath: docker-compose.yml
     buildCommand: docker-compose build
-    startCommand: docker-compose up -d
     healthCheckPath: /
 
 databases:
