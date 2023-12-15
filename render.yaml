@@ -1,22 +1,33 @@
-# render.yml
+# render.yaml
 
 services:
-  - type: web
+  - type: docker
     name: frontend
+    dockerfilePath: frontend/Dockerfile
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm start
+    startCommand: npm start
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://localhost:8000/ # Replace with your actual backend URL
+
+  - type: docker
+    name: backend
+    dockerfilePath: backend/Dockerfile
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: REDIS_HOST
+        value: redis
+      - key: REDIS_PORT
+        value: 6379
+
+  - type: docker
+    name: redis
+    dockerfilePath: docker-compose.yml
+    buildCommand: docker-compose build
+    startCommand: docker-compose up -d
     healthCheckPath: /
 
-  - type: web
-    name: backend
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /health
-
-  - type: web
-    name: redis
-    startCommand: docker run -d redis:latest
-
-  - type: web
-    name: filebeat
-    startCommand: filebeat -e
+databases:
+  - name: redis
+    plan: free
