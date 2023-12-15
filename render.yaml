@@ -15,7 +15,8 @@ services:
     dependsOn:
       - service: redis
 
-  - name: redis
+  - type: web
+    name: redis
     startCommand: docker run -d redis:latest
 
   - type: web
