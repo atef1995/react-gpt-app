@@ -15,9 +15,8 @@ services:
     dependsOn:
       - service: redis
 
-  - type: docker
-    name: redis
-    image: redis:latest
+  - name: redis
+    startCommand: docker run -d redis:latest
 
   - type: web
     name: filebeat
