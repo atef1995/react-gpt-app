@@ -15,9 +15,8 @@ services:
     dependsOn:
       - service: redis
 
-  - type: web
+  - type: docker
     name: redis
-    dockerfilePath: Dockerfile # specify the Dockerfile if needed
     image: redis:latest
 
   - type: web
