@@ -20,5 +20,8 @@ RUN [ -f /app/entrypoint.sh ] && chmod +x /app/entrypoint.sh || true
 # Set the ENTRYPOINT to your script
 ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
 
+
 # Set the command to run your application using Uvicorn
-CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload"]
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload"]
