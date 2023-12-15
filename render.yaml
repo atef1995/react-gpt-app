@@ -15,8 +15,8 @@ services:
     runtime: docker
     name: backend
     plan: free
-    dockerfilePath: backend/Dockerfile
-    buildCommand: cd backend && docker build -t backend -f Dockerfile .
+    dockerfilePath: Dockerfile
+    buildCommand: docker build -t backend -f Dockerfile .
     envVars:
       - key: REDIS_HOST
         value: redis
