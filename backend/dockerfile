@@ -5,7 +5,7 @@ FROM python:3.11.4-alpine
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY backend/requirements.txt .
+COPY requirements.txt .
 
 # Install FastAPI dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Copy entrypoint.sh and make it executable if present
-COPY backend/entrypoint.sh /app/entrypoint.sh
+COPY entrypoint.sh /app/entrypoint.sh
 RUN [ -f /app/entrypoint.sh ] && chmod +x /app/entrypoint.sh || true
 
 # Set the ENTRYPOINT to your script
