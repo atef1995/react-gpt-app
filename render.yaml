@@ -1,7 +1,8 @@
 # render.yaml
 
 services:
-  - type: docker
+  - type: web
+    runtime: docker
     name: frontend
     dockerfilePath: frontend/Dockerfile
     buildCommand: cd frontend && npm install && npm run build
@@ -10,7 +11,8 @@ services:
       - key: REACT_APP_API_URL
         value: https://localhost:8000/ # Replace with your actual backend URL
 
-  - type: docker
+  - type: web
+    runtime: docker
     name: backend
     dockerfilePath: backend/Dockerfile
     buildCommand: cd backend && pip install -r requirements.txt
@@ -21,7 +23,8 @@ services:
       - key: REDIS_PORT
         value: 6379
 
-  - type: docker
+  - type: web
+    runtime: docker
     name: redis
     dockerfilePath: docker-compose.yml
     buildCommand: docker-compose build
