@@ -6,7 +6,6 @@ services:
     name: frontend
     dockerfilePath: frontend/Dockerfile
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: npm start
     envVars:
       - key: REACT_APP_API_URL
         value: https://localhost:8000/ # Replace with your actual backend URL
@@ -16,7 +15,6 @@ services:
     name: backend
     dockerfilePath: backend/Dockerfile
     buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: REDIS_HOST
         value: redis
