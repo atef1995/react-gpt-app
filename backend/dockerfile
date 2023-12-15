@@ -13,8 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire backend directory into the container
 COPY . .
 
-# Make entrypoint.sh executable
-RUN chmod +x /app/entrypoint.sh
+# Copy entrypoint.sh and make it executable if present
+COPY backend/entrypoint.sh /app/entrypoint.sh
+RUN [ -f /app/entrypoint.sh ] && chmod +x /app/entrypoint.sh || true
 
 # Set the ENTRYPOINT to your script
 ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
