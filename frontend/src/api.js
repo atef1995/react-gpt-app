@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const api = axios.create({
     // baseURL: 'http://backendBalancer-614402920.eu-central-1.elb.amazonaws.com:8000/',
-    baseURL: 'http://localhost:10000/',
+    baseURL: 'https://backend-iaxc.onrender.com/',
 
     withCredentials: true
 });
