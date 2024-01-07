@@ -22,9 +22,7 @@ services:
 
   - type: redis
     name: redis
-    ipAllowList:
-      - source: 0.0.0.0/0
-        description: everywhere
+    ipAllowList: []
     plan: free
     envVars:
       - key: PORT
