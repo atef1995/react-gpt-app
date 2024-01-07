@@ -27,6 +27,10 @@ services:
     plan: free
     dockerfilePath: Dockerfile
     buildCommand: docker build -t redis -f Dockerfile .
+    envVars:
+      - key: PORT
+        value: 6379
+
 
 databases:
   - name: app
