@@ -22,14 +22,10 @@ services:
 
   - type: redis
     name: redis
-    runtime: docker
-    rootDir: redis
     ipAllowList:
       - source: 0.0.0.0/0
         description: everywhere
     plan: free
-    dockerfilePath: Dockerfile
-    buildCommand: docker build -t redis -f Dockerfile .
     envVars:
       - key: PORT
         value: 6379
