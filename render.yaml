@@ -17,20 +17,14 @@ services:
     plan: free
     dockerfilePath: Dockerfile
     buildCommand: docker build -t backend -f Dockerfile .
-    envVars:
-      - key: REDIS_HOST
-        value: redis
-      - key: REDIS_PORT
-        value: 6379
 
   - type: web
     runtime: docker
     name: redis
     plan: free
-    dockerfilePath: docker-compose.yml
-    buildCommand: docker-compose build
-    healthCheckPath: /
+    dockerfilePath: Dockerfile
+    buildCommand: docker build -t redis -f Dockerfile .
 
 databases:
-  - name: redis
+  - name: app
     plan: free

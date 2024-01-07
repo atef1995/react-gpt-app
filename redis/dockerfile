@@ -1,0 +1,11 @@
+# Use the official Redis image
+FROM redis:latest
+
+# Set a password for Redis (optional)
+# ENV REDIS_PASSWORD=mysecretpassword
+
+# Expose Redis port (default is 6379)
+EXPOSE 6379
+
+# Start Redis server
+CMD ["redis-server", "--requirepass", "Atef#"]  # Replace 'mysecretpassword' with your desired password

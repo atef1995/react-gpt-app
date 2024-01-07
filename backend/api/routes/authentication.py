@@ -45,13 +45,24 @@ def read_root():
 async def startup():
     # Configure it to use Redis. You can also configure it to use in-memory storage.
     redis_host = os.environ.get(
-        "REDIS_HOST", "localhost"
+        "REDIS_HOST", "redis"
     )  # Default to localhost if not set
     redis_port = os.environ.get("REDIS_PORT", 6379)  # Default to 6379 if not set
-    redis_url = f"redis://{redis_host}:{redis_port}"
+    redis_password = os.environ.get(
+        "REDIS_PASSWORD", "Atef#"
+    )  # Update with your Redis password
+    redis_url = f"redis://:{redis_password}@{redis_host}:{redis_port}/0"
 
-    redis = await aioredis.from_url(redis_url)
-    await FastAPILimiter.init(redis=redis, prefix="limiter")
+    try:
+        # Create a Redis connection using aioredis
+        redis = await aioredis.from_url(redis_url)
+
+        # Initialize FastAPILimiter with the Redis connection
+        await FastAPILimiter.init(redis=redis, prefix="limiter")
+        print("Successfully connected to Redis.")
+    except Exception as e:
+        print(f"Failed to connect to Redis: {e}")
+        # Handle connection error appropriately (e.g., raise exception, log error, etc.)
 
 
 @router.post("/register/")
