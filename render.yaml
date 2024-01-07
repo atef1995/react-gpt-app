@@ -19,6 +19,9 @@ services:
     plan: free
     dockerfilePath: Dockerfile
     buildCommand: docker build -t backend -f Dockerfile .
+    envVars: # Replace with your actual backend URL
+      - key: PORT
+        value: 3000
 
   - type: redis
     name: redis
