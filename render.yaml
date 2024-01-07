@@ -5,7 +5,7 @@ services:
     runtime: docker
     name: frontend
     plan: free
-    dockerfilePath: frontend/Dockerfile
+    dockerfilePath: Dockerfile
     buildCommand: cd frontend && npm install && npm run build
     envVars:
       - key: REACT_APP_API_URL
