@@ -47,7 +47,7 @@ async def startup():
     redis_host = os.environ.get(
         "REDIS_HOST", "localhost"
     )  # Default to localhost if not set
-    redis_port = os.environ.get("REDIS_PORT", 6379)  # Default to 6379 if not set
+    redis_port = int(os.environ.get("REDIS_PORT", 6379))  # Default to 6379 if not set
     redis_password = os.environ.get(
         "REDIS_PASSWORD", "Atef#"
     )  # Update with your Redis password
