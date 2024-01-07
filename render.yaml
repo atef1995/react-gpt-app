@@ -8,9 +8,9 @@ services:
     plan: free
     dockerfilePath: Dockerfile
     buildCommand: cd frontend && npm install && npm run build
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://localhost:8000/ # Replace with your actual backend URL
+    envVars: # Replace with your actual backend URL
+      - key: PORT
+        value: 8000
 
   - type: web
     runtime: docker

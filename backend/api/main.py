@@ -8,18 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "http://18.159.235.178",
-    "http://18.159.235.178:8000",
-    "http://18.159.51.170",
-    "http://18.184.24.8",
-    "http://18.156.155.238",
-    "http://backendBalancer-614402920.eu-central-1.elb.amazonaws.com",
-    "http://frontendl-463996173.eu-central-1.elb.amazonaws.com",
-    # add any other origins you need to allow requests from
     "http://192.168.1.233:3000",
     "http://localhost:3000",
     "http://localhost",
-    "http://localhost:80",
+    "http://localhost:8000",
+    "http://localhost:10000",
 ]
 
 app.add_middleware(
