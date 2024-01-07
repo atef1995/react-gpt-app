@@ -43,14 +43,28 @@ def read_root():
 
 @router.on_event("startup")
 async def startup():
-    # Configure it to use Redis. You can also configure it to use in-memory storage.
-    redis_host = os.environ.get(
-        "REDIS_HOST", "localhost"
-    )  # Default to localhost if not set
-    redis_port = os.environ.get("REDIS_PORT", 6379)  # Default to 6379 if not set
-    redis_url = f"redis://{redis_host}:{redis_port}"
+    # Extract Redis connection details from the connection string
+    redis_connection_string = os.environ.get("REDIS_URL")
 
+    if not redis_connection_string:
+        raise ValueError("REDIS_URL environment variable is not set")
+
+    # Assuming the connection string format is: redis://username:password@host:port/database
+    # Parse the connection string to extract host, port, username, and password
+    redis_url_parts = redis_connection_string.split("://")[1].split(":")
+    username, password = (
+        redis_url_parts[0].split("@")[0].split("_")[-1],
+        redis_url_parts[0].split("@")[0].split("_")[-2],
+    )
+    host, port = redis_url_parts[1].split("@")[1], redis_url_parts[1].split("/")[0]
+
+    # Construct the redis_url using the parsed components
+    redis_url = f"redis://{username}:{password}@{host}:{port}/0"  # Assuming database 0, adjust if needed
+
+    # Create a Redis connection using aioredis
     redis = await aioredis.from_url(redis_url)
+
+    # Initialize FastAPILimiter with the Redis connection
     await FastAPILimiter.init(redis=redis, prefix="limiter")
 
 
