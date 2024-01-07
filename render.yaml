@@ -4,6 +4,7 @@ services:
   - type: web
     runtime: docker
     name: frontend
+    region: frankfurt
     rootDir: frontend
     plan: free
     dockerfilePath: Dockerfile
@@ -15,6 +16,7 @@ services:
   - type: web
     runtime: docker
     name: backend
+    region: frankfurt
     rootDir: ./backend
     plan: free
     dockerfilePath: Dockerfile
@@ -25,10 +27,12 @@ services:
 
   - type: redis
     name: redis
+    region: frankfurt
     ipAllowList: []
     plan: free
 
 
 databases:
   - name: app
+    region: frankfurt
     plan: free
