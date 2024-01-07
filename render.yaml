@@ -24,9 +24,6 @@ services:
     name: redis
     ipAllowList: []
     plan: free
-    envVars:
-      - key: PORT
-        value: 6379
 
 
 databases:
