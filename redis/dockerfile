@@ -8,4 +8,4 @@ FROM redis:latest
 EXPOSE 6379
 
 # Start Redis server
-CMD ["redis-server", "--requirepass", "Atef#"]  # Replace 'mysecretpassword' with your desired password
+CMD ["redis-server"]

@@ -48,10 +48,7 @@ async def startup():
         "REDIS_HOST", "localhost"
     )  # Default to localhost if not set
     redis_port = int(os.environ.get("REDIS_PORT", 6379))  # Default to 6379 if not set
-    redis_password = os.environ.get(
-        "REDIS_PASSWORD", "Atef#"
-    )  # Update with your Redis password
-    redis_url = f"redis://:{redis_password}@{redis_host}:{redis_port}/0"
+    redis_url = f"redis://:{redis_host}:{redis_port}"
 
     try:
         # Create a Redis connection using aioredis
