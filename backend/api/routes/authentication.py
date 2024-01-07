@@ -45,7 +45,7 @@ def read_root():
 async def startup():
     # Configure it to use Redis. You can also configure it to use in-memory storage.
     redis_host = os.environ.get(
-        "REDIS_HOST", "localhost"
+        "REDIS_HOST", "0.0.0.0"
     )  # Default to localhost if not set
     redis_port = os.environ.get("REDIS_PORT", 6379)  # Default to 6379 if not set
     redis_url = f"redis://{redis_host}:{redis_port}"
