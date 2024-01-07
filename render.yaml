@@ -23,6 +23,7 @@ services:
   - type: web
     runtime: docker
     name: redis
+    rootDir: redis
     plan: free
     dockerfilePath: Dockerfile
     buildCommand: docker build -t redis -f Dockerfile .
