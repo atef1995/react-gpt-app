@@ -13,7 +13,7 @@ This is a full-stack application that allows users to chat with OpenAI's GPT mod
 
 - **Frontend**: React, Tailwind CSS
 - **Backend**: FastAPI, PostgreSQL
-- **Others**: Docker, OpenAI's GPT API
+- **Others**: Docker, OpenAI's GPT API, Redis.
 
 ## Installation and Setup
 
